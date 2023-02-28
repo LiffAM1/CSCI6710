@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+
+
+        // array of json objects
+        var classmate_data = [
+            {
+                name: "John",
+                shadow: "no",
+                galic: "no",
+                complexion: "pale",
+            },
+            {
+                name: "Lee",
+                shadow: "yes",
+                galic: "no",
+                complexion: "pale",
+            },
+            {
+                name: "Emma",
+                shadow: "no",
+                galic: "yes",
+                complexion: "brown",
+            },
+            {
+                name: "Ava",
+                shadow: "yes",
+                galic: "yes",
+                complexion: "olive ",
+            },
+            {
+                name: "Alex",
+                shadow: "no",
+                galic: "no",
+                complexion: "brown",
+            },
+        ];
+
+        //Model  of MVC
+        //TODO: create a function for random guess
+
+
+        //TODO: create a function for threshold 
+        function classmate_data_processing(result_data) {
+            var num_human = 0;
+            var num_vampire = 0;
+            for (var i = 0; i <= classmate_data.length - 1; i++) {
+                if (classmate_data[i]["shadow"] == "no") {
+                    num_vampire++;
+                } else {
+                    num_human++;
+                }
+            }
+            result_data.addColumn("string", "Element");
+            result_data.addColumn("number", "Count");
+            result_data.addRows([
+                ["Human", num_human],
+                ["Vampire", num_vampire],
+            ]);
+        }
+
+
+
+        google.charts.load("current", { packages: ["corechart"] });
+
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+
+            //TODO: will need to come back and update to grab correct user input from drop down...maybe a condition?
+            classmate_data_processing(data);
+
+            var options = {
+                title: "How many vampires in the class?",
+                width: 400,
+                height: 300,
+            };
+
+            var chart = new google.visualization.PieChart(
+                document.getElementById("chart_div")
+            );
+            chart.draw(data, options);
+        }
+
+
+
+//Controller MVC 
+
+
+//TODO: display method for new students into table
+
+//TODO: upload method for new student into data
+    </script>
+    <title>Are you a Vampire?</title>
+</head>
+
+<body>
+
+    <br>
+
+    <div class="form-group">
+        <label for="mySelect">Data preprocessing choice:</label>
+        <select class="form-control" id="mySelect">
+            <option value='1'>Random Guess</option>
+            <option value='2'>Threshold Based Method</option>
+            <option value='3'>Decision Tree</option>
+        </select>
+
+
+        <!-- TODO: populate a table with new students added -->
+        <div class="container">
+            <table class="table table-bordered" id="saving_table">
+                <caption>Savings</caption>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Savings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>January</td>
+                        <td>$100</td>
+                    </tr>
+                    <tr>
+                        <td>February</td>
+                        <td>$80</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Sum</td>
+                        <td>$180</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="shadow">
+                <div class="form-group col-md-12">
+                    <h4>Do you have a shadow?</h4>
+                    <div class="radio">
+                        <label><input type="radio" name="optradio" id="Vamp" checked />Yes</label>
+                    </div>
+                    <div class="radio">
+                        <label><input type="radio" name="optradio" id="Non-vamp" />No</label>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="garlic">
+                <div class="form-group col-md-12">
+                    <h4>Do you like garlic?</h4>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="garlic_checkbox" />garlic toast</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="food_checkbox" />brownie</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="food_checkbox" />pancakes</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="food_checkbox" />fried chicken</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="food_checkbox" />canoli</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="slidecontainer">
+                <div class="form-group col-md-12">
+                    <h4>How pale are you?</h4>
+                    <input type="range" min="0" max="10" value="5" class="slider" id="1">
+                    <span id="demo">6</span>
+                </div>
+                <script>
+                    var slider = document.getElementById("1");
+                    var output = document.getElementById("demo");
+                    output.innerHTML = slider.value; // Display the default slider value
+
+                    // Update the current slider value (each time you drag the slider handle)
+                    slider.oninput = function () {
+                        output.innerHTML = this.value;
+                    }
+                </script>
+            </div>
+
+
+            <br>
+            <div class="form-group">
+                <div class="form-group col-md-12">
+                    <h4>What about that accent?</h4>
+                    <label for="mySelect"></label>
+                    <select class="accent" id="mySelect">
+                        <option value='1'>German</option>
+                        <option value='2'>English - UK</option>
+                        <option value='3'>Romanian</option>
+                        <option value='4'>Russian</option>
+                        <option value='4'>Other</option>
+                    </select>
+                </div>
+                <br>
+                <br>
+
+                <div class="form-group col-md-12">
+                    <button type="button">Submit</button>
+                </div>
+</body>
+
+</html>
