@@ -2,22 +2,42 @@
 /*
 */
 var classmate_data = [];
+var chart;
+var data;
+var options;
+var num_vampire = 0;
+var num_human = 0;
 
-function reprocessVampire() {
+$( document ).ready(function() {
+    update_slider();
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(draw_chart);
+});
+
+function reprocess_classmates() {
     var rows = document.getElementById("vampire_table").rows;
     for (var x = 1; x < rows.length; x++) {
         var row = rows[x];
 
-        var student = classmate_data[i]
+        var student = classmate_data[x-1]
 
-        var isVampire = isStudentAVampire(student.vampireScore);
-        student.isVampire = isVampire;
+        student.isVampire = determine_vampire_status(student);
 
-        row.cells[1].innerHTML = isVampire ? "Vampire" : "Human";
+        row.cells[1].innerHTML = student.isVampire ? "Vampire" : "Human";
     }
 }
 
-function insertStudentToTable(id, name, isVampire) {
+function update_slider() {
+    var complexions = ['ghostly','porcelain','pale','fair','light','medium','golden','tan','brown','chocolate','deep'];
+
+    // Update the current slider value (each time you drag the slider handle)
+    var slider = document.getElementById("complexion_slider");
+    var output = document.getElementById("complexion_value");
+
+    output.innerHTML = complexions[slider.value-1];
+}
+
+function add_to_table(id, name, isVampire) {
     var table = document.getElementById("vampire_table");
 
     var row = table.insertRow(1);
@@ -28,19 +48,55 @@ function insertStudentToTable(id, name, isVampire) {
     cell2.innerHTML = isVampire ? "Vampire" : "Human";
 }
 
-function threshold_based(shadow, garlic, complexion, romanianAccent) {
+function determine_vampire_status(student) {
+    var processing = parseInt(document.getElementById("mySelect").value);
+    var isVampire = false;
+
+    // Random
+    if (processing === 1) {
+        isVampire = Math.floor(Math.random()*2) === 1;
+    }
+
+    // Threshold-based
+    else if (processing === 2) {
+        isVampire = calculate_with_threshold(
+            student.shadow,
+            student.garlic,
+            student.complexion,
+            student.romanianAccent,
+            student.easternAccent);
+    }
+
+    return isVampire;
+}
+
+function calculate_with_threshold(shadow, garlic, complexion, romanianAccent, easternAccent) {
+    console.log(shadow);
+    console.log(garlic);
+    console.log(complexion);
+    console.log(romanianAccent);
+    console.log(easternAccent);
+
     var vampireScore = 0;
 
     shadow ? vampireScore -= 5 : vampireScore += 5;
     garlic ? vampireScore -= 5 : vampireScore += 5;
-    // Assume higher value means more pale
-    complexion > 5 ? vampireScore += 5 : vampireScore -= 5;
-    romanianAccent ? vampireScore += 5 : vampireScore -= 5;
+
+    // +5 if they're from Romania, neutral if they're from somewhere in eastern Europe, -5 otherwise
+    if (romanianAccent) {
+        vampireScore += 5;
+    } else if (!easternAccent) {
+        vampireScore -= 5; 
+    }
+
+    vampireScore += ((11-complexion)-5) // Adds points between -5 (darkest) and 5 (lightest)
+
+    console.log(vampireScore);
 
     return vampireScore > 0;
 }
 
-function submitUserInput() {
+function submit() {
     // name
     var name = document.getElementById("student_name").value;
 
@@ -53,52 +109,45 @@ function submitUserInput() {
     // complexion
     var complexion = document.getElementById("complexion_slider").value;
 
+    var romanianAccent = false;
+    var easternAccent = false;
     // accent
-    var romanianAccent = parseInt(document.getElementById("accent_select").value) === 3;
-
-    var processing = parseInt(document.getElementById("mySelect").value);
-    var isVampire = false;
-
-    if (processing === 1) {
-        isVampire = Math.floor(Math.random()*2) === 1;
-    }
-    else if (processing === 2) {
-        isVampire = threshold_based(shadow, garlic, complexion, romanianAccent)
+    var accent = parseInt(document.getElementById("accent_select").value)
+    switch (accent) {
+        case 'ro':
+            romanianAccent = true;
+            break;
+        case 'md':
+        case 'rs':
+            easternAccent = true;
+            break;      
     }
 
     var student = {
-        id: classmate_data.length,
-        name,
-        shadow,
-        garlic,
-        complexion,
-        romanianAccent,
-        isVampire
+        'id': classmate_data.length,
+        'name': name,
+        'shadow': shadow,
+        'garlic': garlic,
+        'complexion': complexion,
+        'romanianAccent': romanianAccent,
+        'easternAccent': easternAccent,
+        'isVampire': false
     }
 
+    student.isVampire = determine_vampire_status(student);
+
     classmate_data.push(student);
-    insertStudentToTable(student.id, student.name, student.isVampire);
-    updateChart();
+    add_to_table(student.id, student.name, student.isVampire);
+    update_chart();
 }
 
-//Model  of MVC
-//TODO: create a function for random guess
-
-google.charts.load('current', {'packages':['corechart']});
-
-google.charts.setOnLoadCallback(drawChart);
-
 // Visualization
-var chart;
-var data;
-var options;
-var num_vampire = 0;
-var num_human = 0;
-
-function updateChart() {
+function update_chart() {
     var num_vampire = classmate_data.filter((item) => item.isVampire).length;
     var num_human = classmate_data.length - num_vampire;
-    drawChart();
+
+    draw_chart();
+
     data.removeRow(1);
     data.removeRow(0);
     data.insertRows(0, [['Human', num_human]]);
@@ -107,7 +156,7 @@ function updateChart() {
     chart.draw(data, options);
 }
 
-function drawChart() {
+function draw_chart() {
 
     // Create the data table.
     data = new google.visualization.DataTable();

@@ -21,7 +21,7 @@
 
     <div class="form-group">
         <label for="mySelect">Data preprocessing choice:</label>
-        <select class="form-control" id="mySelect" onchange="reprocessVampire()">
+        <select class="form-control" id="mySelect" onchange="reprocess_classmates()">
             <option value='1'>Random Guess</option>
             <option value='2'>Threshold Based Method</option>
             <option value='3'>Decision Tree</option>
@@ -84,18 +84,11 @@
             <div class="slidecontainer">
                 <div class="form-group col-md-12">
                     <h4>How pale are you?</h4>
-                    <input type="range" min="0" max="10" value="5" class="slider" id="complexion_slider">
-                    <span id="complexion_value">6</span>
+                    <input type="range" min="1" max="11" value="6" class="slider" id="complexion_slider" oninput="update_slider()">
+                    <span id="complexion_value"></span>
                 </div>
                 <script>
-                    var slider = document.getElementById("complexion_slider");
-                    var output = document.getElementById("complexion_value");
-                    output.innerHTML = slider.value; // Display the default slider value
 
-                    // Update the current slider value (each time you drag the slider handle)
-                    slider.oninput = function () {
-                        output.innerHTML = this.value;
-                    }
                 </script>
             </div>
 
@@ -105,18 +98,19 @@
                 <div class="form-group col-md-12">
                     <h4>What about that accent?</h4>
                     <select class="accent" id="accent_select">
-                        <option value='1'>German</option>
-                        <option value='2'>English - UK</option>
-                        <option value='3'>Romanian</option>
-                        <option value='4'>Russian</option>
-                        <option value='4'>Other</option>
+                        <option value='gm'>German</option>
+                        <option value='uk'>English - UK</option>
+                        <option value='ro'>Romanian</option>
+                        <option value='rs'>Russian</option>
+                        <option value="md">Moldovan</option>
+                        <option value='ot'>Other</option>
                     </select>
                 </div>
                 <br>
                 <br>
 
                 <div class="form-group col-md-12">
-                    <button type="button" onclick="submitUserInput()">Submit</button>
+                    <button type="button" onclick="submit()">Submit</button>
                 </div>
 <div>
   <p>Current vampire percentage pie graph:</p>
