@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="index.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="index.js"></script>
+    <title>Are you a Vampire?</title>
+</head>
+
+<body>
+    <header>
+        <div class="p-5 text-center bg-light">
+            <h1 class="mb-3">Is Your Classmate A Vampire?</h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="col-sm-8">
+            <h3 class="mb-3">Classmate Data</h3>
+            <div class="form-group row mb-3">
+                <label for="processingChoice" class="col-sm-2 col-form-label custom-form-label-md">Model logic choice</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="processingChoice" onchange="reprocess_classmates()">
+                        <option value='1'>Random Guess</option>
+                        <option value='2'>Threshold Based Method</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="hr" />
+            <div class="form-group row mb-3">
+                <label for="studentName" class="col-sm-2 col-form-label custom-form-label-md">Student name</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="studentName"/>
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <legend class="col-form-label col-sm-2 pt-0 custom-form-label-md">Do they have a shadow?</legend>
+                <div class="col-sm-6">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="optradio" id="yesShadow" value="1" checked />
+                        <label class="form-check-label custom-form-label-sm" for="hasShadow">Yes</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="optradio" id="noShadow" value="2"/>
+                        <label class="form-check-label custom-form-label-sm" for="hasShadow">No</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <legend class="col-form-label col-sm-2 pt-0 custom-form-label-md">What foods do they enjoy?</legend>
+                <div class="col-sm-6">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="garlicCheckbox" checked />
+                        <label class="form-check-label custom-form-label-sm" for="garlicCheckbox">Garlic toast</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="foodCheckbox1"/>
+                        <label class="form-check-label custom-form-label-sm" for="foodCheckbox1">Brownie</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="foodCheckbox2"/>
+                        <label class="form-check-label custom-form-label-sm" for="foodCheckbox2">Pancakes</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="foodCheckbox3"/>
+                        <label class="form-check-label custom-form-label-sm" for="foodCheckbox3">Fried chicken</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="foodCheckbox3"/>
+                        <label class="form-check-label custom-form-label-sm" for="foodCheckbox4">Canoli</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="complexionSlider" class="col-sm-2 col-form-label custom-form-label-md">Select their complexion</label>
+                <div class="col-sm-6">
+                    <input type="range" min="1" max="11" value="6" class="slider" id="complexionSlider" oninput="update_slider()">
+                    <span id="complexionValue"></span>
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="accentSelect" class="col-sm-2 col-form-label custom-form-label-md">Select their accent</label>
+                <div class="col-sm-6">
+                    <select class="form-control custom-form-label-md" id="accentSelect">
+                        <option value='gm'>German</option>
+                        <option value='uk'>English - UK</option>
+                        <option value='ro'>Romanian</option>
+                        <option value='rs'>Russian</option>
+                        <option value="md">Moldovan</option>
+                        <option value='ot'>Other</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="hr" />
+            <div class="row mb-3">
+                <button onclick="submit()" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <h3 class="mb-3">Results</h3>
+            <table class="table table-bordered" id="vampireTable">
+                <caption></caption>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Is Vampire</th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="chartDiv"></div>
+        </div>
+    </div>
+</body>
+
+</html>
