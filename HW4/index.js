@@ -1,12 +1,12 @@
 // array of json objects
-/*
-*/
+
 var classmate_data = [];
 var chart;
 var data;
 var options;
 var num_vampire = 0;
 var num_human = 0;
+var model;
 
 $( document ).ready(function() {
     update_slider();
@@ -15,7 +15,7 @@ $( document ).ready(function() {
 });
 
 function reprocess_classmates() {
-    var rows = document.getElementById("vampire_table").rows;
+    var rows = document.getElementById("vampireTable").rows;
     for (var x = 1; x < rows.length; x++) {
         var row = rows[x];
 
@@ -31,14 +31,14 @@ function update_slider() {
     var complexions = ['ghostly','porcelain','pale','fair','light','medium','golden','tan','brown','chocolate','deep'];
 
     // Update the current slider value (each time you drag the slider handle)
-    var slider = document.getElementById("complexion_slider");
-    var output = document.getElementById("complexion_value");
+    var slider = document.getElementById("complexionSlider");
+    var output = document.getElementById("complexionValue");
 
     output.innerHTML = complexions[slider.value-1];
 }
 
 function add_to_table(id, name, isVampire) {
-    var table = document.getElementById("vampire_table");
+    var table = document.getElementById("vampireTable");
 
     var row = table.insertRow(1);
     row.setAttribute("id", id);
@@ -49,7 +49,7 @@ function add_to_table(id, name, isVampire) {
 }
 
 function determine_vampire_status(student) {
-    var processing = parseInt(document.getElementById("mySelect").value);
+    var processing = parseInt(document.getElementById("processingChoice").value);
     var isVampire = false;
 
     // Random
@@ -97,22 +97,23 @@ function calculate_with_threshold(shadow, garlic, complexion, romanianAccent, ea
 }
 
 function submit() {
+    console.log("here")
     // name
-    var name = document.getElementById("student_name").value;
+    var name = document.getElementById("studentName").value;
 
     // shadow
-    var shadow = document.getElementById("has_shadow").checked;
+    var shadow = document.getElementById("yesShadow").checked;
 
     // garlic
-    var garlic = document.getElementById("garlic_checkbox").checked;
+    var garlic = document.getElementById("garlicCheckbox").checked;
 
     // complexion
-    var complexion = document.getElementById("complexion_slider").value;
+    var complexion = document.getElementById("complexionSlider").value;
 
     var romanianAccent = false;
     var easternAccent = false;
     // accent
-    var accent = parseInt(document.getElementById("accent_select").value)
+    var accent = parseInt(document.getElementById("accentSelect").value)
     switch (accent) {
         case 'ro':
             romanianAccent = true;
@@ -168,11 +169,9 @@ function draw_chart() {
     ]);
 
     // Set chart options
-    options = {'title':'How many vampires in the class?',
-                    'width':400,
-                    'height':300};
+    options = {'width':400,'height':400};
 
     // Instantiate and draw our chart, passing in some options.
-    chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+    chart = new google.visualization.PieChart(document.getElementById('chartDiv'));
     chart.draw(data, options);
 }
