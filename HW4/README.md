@@ -13,7 +13,7 @@ I was not able to get Tensorflow JS working as it did not appear to support tree
 
 ## Instructions
 1. Clone the Repository: `git clone https://github.com/LiffAM1/CSCI6710.git`
-2. Open a terminal in the install folder or `cd` there
+2. Open a terminal in the repo folder or `cd` there
 2. Install the requirements.txt to get the requirements: `pip install -r requirements.txt`
 3. Run the flask app: `flask run`
 4. Wait until the model trains (NOTE: The model trains whenever the app is run due to issues with loading Tensorflow SavedModels that I was running in to). You will see this when the model site is ready:
