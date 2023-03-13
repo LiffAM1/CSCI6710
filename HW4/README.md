@@ -1,14 +1,18 @@
 # CSCI6710
-CSCI6710 Group Project
+CSCI6710 Homework 4
 
-Data related assignment: vampire guesses are done by three different data preprocesssing choices made by user
+## Team Members:
+Kristen Griffith, Katie Warren, Abigail Holloway
 
-1. Thresholding
-2. Guessing 
-3. Decision trees (extra credit)
+## Prerequisites
+- It is required that you run this on a Linux machine. This is because it uses [Tensorflow Decision Forests](https://www.tensorflow.org/decision_forests), which is currently only supported on Linux.
+- It is required to have Python 3 and `pip` installed.
 
-Model - model is developed based on the choice of the user on which data preprocessing step to use. The pie chart is developed in example 24 within drawchart() and he shows an example of counting the number of vampires based on whether they had a show or not. .The vampires are counted in the classmate_data_processing() function. 
-
-View -  Will need to display chart based on the data preprocessing method chosen
-
-Controller - I will need to create a drop down with different data preprocessing options, the selection will call a preprocessing function like example . Will also need to display a table of current students and give the user the option of adding new students, editing students, and deleting students. Will need to create a function to append to data..
+## Instructions
+1. Clone the Repository: `git clone https://github.com/LiffAM1/CSCI6710.git`
+2. Open a terminal in the install folder or `cd` there
+2. Install the requirements.txt to get the requirements: `pip install -r requirements.txt`
+3. Run the flask app: `flask run`
+4. Wait until the model trains (NOTE: The model trains whenever the app is run due to issues with loading Tensorflow SavedModels that I was running in to). You will see this when the model site is ready:
+5. Navigate to http://localhost:5000/static/index.html in your browser
+6. You should be able to use the form!
