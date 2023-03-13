@@ -1,5 +1,3 @@
-// array of json objects
-
 var classmate_data = [];
 var chart;
 var data;
@@ -11,7 +9,7 @@ var model;
 $( document ).ready(function() {
     update_slider();
     google.charts.load('current', {'packages':['corechart']});
-    google.charts.setOnLoadCallback(draw_chart);
+    google.charts.setOnLoadCallback(draw_chart)
 });
 
 function reprocess_classmates() {
@@ -25,7 +23,39 @@ function reprocess_classmates() {
 
         row.cells[1].innerHTML = student.isVampire ? "Vampire" : "Human";
     }
+    update_chart();
 }
+
+function build_post_data(student) {
+    var sample = {}
+    sample["shadow"] = student.shadow;
+    sample["garlic"] = student.garlic;
+    sample["romanianAccent"] = student.romanianAccent;
+    sample["easternAccent"] = student.easternAccent;
+    sample["complexion"] = ((11-student.complexion)-5);
+    return JSON.stringify(sample);
+}
+
+// Call the backend to make a prediction against the TF random forest model
+function random_forest_predict(student) {
+    var isVampire;
+    $.ajax ({
+        url: "http://localhost:5000/predict",
+        type: "POST",
+        data: build_post_data(student),
+        dataType: "json",
+        async: false,
+        contentType: "application/json; charset=utf-8",
+        success: function(data) {
+            isVampire = data === "Vampire";
+        },
+        error: function(error) {
+            alert("Something bad happened with the prediction: " + error.toString());
+        }
+    });
+    return isVampire;
+}
+
 
 function update_slider() {
     var complexions = ['ghostly','porcelain','pale','fair','light','medium','golden','tan','brown','chocolate','deep'];
@@ -67,15 +97,15 @@ function determine_vampire_status(student) {
             student.easternAccent);
     }
 
+    // Random Forest
+    else if (processing == 3) {
+        isVampire = random_forest_predict(student);
+    }
+
     return isVampire;
 }
 
 function calculate_with_threshold(shadow, garlic, complexion, romanianAccent, easternAccent) {
-    console.log(shadow);
-    console.log(garlic);
-    console.log(complexion);
-    console.log(romanianAccent);
-    console.log(easternAccent);
 
     var vampireScore = 0;
 
@@ -97,7 +127,6 @@ function calculate_with_threshold(shadow, garlic, complexion, romanianAccent, ea
 }
 
 function submit() {
-    console.log("here")
     // name
     var name = document.getElementById("studentName").value;
 
