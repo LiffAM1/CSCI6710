@@ -4,13 +4,14 @@ CSCI6710 Homework 4
 ## Team Members:
 Kristen Griffith, Katie Warren, Abigail Holloway
 
+## Flowhcarts
+The flowcharts do not include the extra credit logic, just the threshold-based and random decision logic.
+
+
 ## Prerequisites
 - It is required that you run this on a Linux machine. This is because it uses [Tensorflow Decision Forests](https://www.tensorflow.org/decision_forests), which is currently only supported on Linux.
 - It is recommended to have Python 3.10 (I have not tried this on earlier versions of Python) - install with `sudo apt install python3.10`.
 - It is required to have `pip` installed - install with `sudo apt install pip`.
-
-## Notes
-I was not able to get Tensorflow JS working as it did not appear to support tree-based methods, so I went ahead and set up a flask server to serve predictions from a model trained on the backend. I generated 1000 samples of training data based on a threshold-based method (see vampire_data.csv).
 
 ## Instructions
 1. Clone the Repository: `git clone https://github.com/LiffAM1/CSCI6710.git`
