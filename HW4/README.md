@@ -5,8 +5,7 @@ CSCI6710 Homework 4
 Kristen Griffith, Katie Warren, Abigail Holloway
 
 ## Flowhcarts
-The flowcharts do not include the extra credit logic, just the threshold-based and random decision logic.
-
+These can be found in the "flowcharts" folder. Note that the flowcharts do not include the extra credit logic, just the threshold-based and random decision logic.
 
 ## Prerequisites
 - It is required that you run this on a Linux machine. This is because it uses [Tensorflow Decision Forests](https://www.tensorflow.org/decision_forests), which is currently only supported on Linux.
