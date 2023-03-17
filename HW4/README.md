@@ -25,4 +25,4 @@ I was not able to get Tensorflow JS working as it did not appear to support tree
 ## Notes
 I was not able to get Tensorflow JS working with a tree-based method since it seems like it is mainly for use with neural networks and is not compatible with Tensorflow Decision Forests or other Tensorflow Saved Models. I made the decision to do the training and predicting against the model from the backend using regular Tensorflow. I generated the data (vampire_data.csv) using a threshold-based method in Google Sheets and trained the model using a random sample of 2/3 of the data each time.
 
-If you have issues getting the Flask server or dependencies running, please grade the assignment as-is without the extra credit (just open and run index.html in the browser and do not select Decision Forest as the logic processing method).
+**If you have issues getting the Flask server or dependencies running, please grade the assignment as-is without the extra credit (just open and run index.html in the browser and do not select Decision Forest as the logic processing method).**
