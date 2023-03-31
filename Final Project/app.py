@@ -1,6 +1,8 @@
 import json
 import os
 from flask import Flask, redirect, request, url_for
+from src.model.repo import PostgresRepo
+from src.model.models import User
 
 from flask_login import (
     LoginManager,
@@ -18,21 +20,6 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = ("https://accounts.google.com/.well-known/openid-configuration")
 
-# We'll want to bind this to the database eventually
-class User:
-    def __init__(self, id, name, email, profile_pic):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.profile_pic = profile_pic
-        self.is_active = True 
-        self.is_authenticated = True
-
-    def get_id(self):
-        return self.id
-
-# Temp DB
-users = {}
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
@@ -42,10 +29,12 @@ login_manager.init_app(app)
 
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
+repo = PostgresRepo()
+
 
 @login_manager.user_loader
 def load_user(user_id):
-    return users[user_id] 
+    return repo.get_user(user_id)
 
 # Temp landing page 
 @app.route("/")
@@ -54,10 +43,8 @@ def index():
     if current_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
-            "<div><p>Google Profile Picture:</p>"
-            '<img src="{}" alt="Google profile pic"></img></div>'
             '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email, current_user.profile_pic
+                current_user.name, current_user.email
             )
         )
     else:
@@ -114,15 +101,17 @@ def callback():
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_email = userinfo_response.json()["email"]
-        picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
     else:
         return "User email not available or not verified by Google.", 400
 
-    if unique_id not in users.keys():
-        users[unique_id] = User(id=unique_id, name=users_name, email=users_email, profile_pic=picture)
-
-    user = users[unique_id]
+    user = repo.get_user(unique_id)
+    if not user:
+        user = User(id=unique_id, name=users_name, email=users_email, is_active=True, is_authenticated=True)
+        repo.create_user(user)
+    else:
+        repo.set_active(user.id)
+    user = repo.get_user(unique_id)
 
     # Begin user session by logging the user in
     login_user(user)
@@ -133,6 +122,7 @@ def callback():
 @app.route("/logout")
 @login_required
 def logout():
+    repo.set_inactive(current_user.id)
     logout_user()
     return redirect(url_for("index"))
 
