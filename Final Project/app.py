@@ -126,5 +126,11 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+@app.route("/post/create/<petId>", methods = ['POST'])
+def createNewPost(petId):
+    message = request.form["message"]
+    repo.create_post(petId, message)
+    return redirect(url_for('success', name = user))
+
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))
