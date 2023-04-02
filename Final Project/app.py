@@ -135,8 +135,23 @@ def createNewPost():
     return redirect(url_for('success'))
 
 @app.route("/posts/friends/<petId>", methods = ["GET"])
-def getPosts(petId):
+def getFriendsPosts(petId):
     posts = repo.get_friend_posts(petId)
+    return json.dumps(posts, indent=4, sort_keys=True, default=str)
+
+@app.route("/posts/<postId>", methods = ["GET"])
+def getPost(postId):
+    post = repo.get_post(postId)
+    return json.dumps(post, indent=4, sort_keys=True, default=str)
+
+@app.route("/posts/<postId>", methods = ["DELETE"])
+def deletePost(postId):
+    post = repo.delete_post(postId)
+    return redirect(url_for('success'))
+
+@app.route("/posts/pet/<petId>", methods = ["GET"])
+def getAllPetPosts(petId):
+    posts = repo.get_posts(petId)
     return json.dumps(posts, indent=4, sort_keys=True, default=str)
 
 
