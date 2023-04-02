@@ -1,6 +1,6 @@
 import json
 import os
-from flask import Flask, redirect, request, url_for
+from flask import Flask, redirect, request, url_for, jsonify
 from src.model.repo import PostgresRepo
 from src.model.models import User
 
@@ -125,6 +125,20 @@ def logout():
     repo.set_inactive(current_user.id)
     logout_user()
     return redirect(url_for("index"))
+
+@app.route("/posts", methods = ["POST"])
+def createNewPost():
+    petId = request.form["petId"]
+    message = request.form["message"]
+    repo.create_post(petId, message)
+    # TODO Finish success
+    return redirect(url_for('success'))
+
+@app.route("/posts/friends/<petId>", methods = ["GET"])
+def getPosts(petId):
+    posts = repo.get_friend_posts(petId)
+    return json.dumps(posts, indent=4, sort_keys=True, default=str)
+
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))

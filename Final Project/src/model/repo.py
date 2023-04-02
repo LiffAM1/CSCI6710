@@ -1,7 +1,9 @@
 import os
 import psycopg2
+import datetime
+import uuid
 
-from src.model.models import User
+from src.model.models import User, Post
 
 class PostgresRepo:
     def __init__(self):
@@ -112,8 +114,8 @@ class PostgresRepo:
 
     def get_post(post_id):
     def get_posts(pet_id):
-    def get_friend_posts(pet_id):
-    def create_post(post):
+    
+    
     def update_post(post):
 
     def get_post_reactions(post_id):
@@ -122,3 +124,38 @@ class PostgresRepo:
     def create_post_reaction(reaction):
     def delete_post_reaction(reaction_id):
     """
+
+    def create_post(self, petId, message):
+        try:
+            currentDate = datetime.datetime.now()
+            id = str(uuid.uuid4())
+
+            conn = self.get_conn()
+            cur = conn.cursor()
+            cur.execute('INSERT INTO posts (id, pet_id, message, photo, post_date)'
+                        'VALUES (%s,%s,%s,%s,%s)',
+                        (id, petId, message, "", currentDate))
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(e)
+
+    def get_friend_posts(self, pet_id):
+        try:
+            conn = self.get_conn()
+            cur = conn.cursor()
+            cur.execute('SELECT p.id, p.pet_id, p.message, p.photo, p.post_date FROM posts p JOIN friends f on f.friend_id = p.pet_id WHERE f.pet_id = %s', (pet_id,))
+
+            posts = []
+            for post in cur:
+                posts.append(Post.from_db(post).__dict__)
+
+            if len(posts) > 0:
+                return posts
+            return None
+            
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(e)
