@@ -3,7 +3,7 @@ import psycopg2
 import datetime
 import uuid
 
-from src.model.models import User
+from src.model.models import User, Post
 
 class PostgresRepo:
     def __init__(self):
@@ -114,7 +114,7 @@ class PostgresRepo:
 
     def get_post(post_id):
     def get_posts(pet_id):
-    def get_friend_posts(pet_id):
+    
     
     def update_post(post):
 
@@ -136,6 +136,25 @@ class PostgresRepo:
                         'VALUES (%s,%s,%s,%s,%s)',
                         (id, petId, message, "", currentDate))
             conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(e)
+
+    def get_friend_posts(self, pet_id):
+        try:
+            conn = self.get_conn()
+            cur = conn.cursor()
+            cur.execute('SELECT p.id, p.pet_id, p.message, p.photo, p.post_date FROM posts p JOIN friends f on f.friend_id = p.pet_id WHERE f.pet_id = %s', (pet_id,))
+
+            posts = []
+            for post in cur:
+                posts.append(Post.from_db(post).__dict__)
+
+            if len(posts) > 0:
+                return posts
+            return None
+            
             cur.close()
             conn.close()
         except Exception as e:
