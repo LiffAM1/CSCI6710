@@ -3,7 +3,8 @@ import os
 from flask import Flask, redirect, request, url_for, abort, jsonify
 from src.model.users_repo import UsersRepo
 from src.model.pets_repo import PetsRepo
-from src.model.models import User, Pet
+from src.model.posts_repo import PostsRepo
+from src.model.models import User, Post, Pet
 
 from flask_login import (
     LoginManager,
@@ -130,24 +131,26 @@ def createNewPost():
     # TODO Finish success
     return redirect(url_for('success'))
 
+# Posts
+posts_repo = PostsRepo()
 @app.route("/posts/friends/<petId>", methods = ["GET"])
 def getFriendsPosts(petId):
-    posts = repo.get_friend_posts(petId)
+    posts = posts_repo.get_friend_posts(petId)
     return json.dumps(posts, indent=4, sort_keys=True, default=str)
 
 @app.route("/posts/<postId>", methods = ["GET"])
 def getPost(postId):
-    post = repo.get_post(postId)
+    post = posts_repo.get_post(postId)
     return json.dumps(post, indent=4, sort_keys=True, default=str)
 
 @app.route("/posts/<postId>", methods = ["DELETE"])
 def deletePost(postId):
-    post = repo.delete_post(postId)
+    post = posts_repo.delete_post(postId)
     return redirect(url_for('success'))
 
 @app.route("/posts/pet/<petId>", methods = ["GET"])
 def getAllPetPosts(petId):
-    posts = repo.get_posts(petId)
+    posts = posts_repo.get_posts(petId)
     return json.dumps(posts, indent=4, sort_keys=True, default=str)
 
 # Pets
