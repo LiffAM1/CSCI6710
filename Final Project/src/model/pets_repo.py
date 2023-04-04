@@ -11,7 +11,7 @@ class PetsRepo(PostgresRepo):
         cur.close()
         conn.close()
         if pet:
-            return Pet.from_db(pet)
+            return Pet.from_db(pet.__dict__)
         return None
 
     def get_pets(self):
@@ -21,7 +21,7 @@ class PetsRepo(PostgresRepo):
         pets = cur.fetchall()
         cur.close()
         conn.close()
-        return [Pet.from_db(pet) for pet in pets]
+        return [Pet.from_db(pet).__dict__ for pet in pets]
 
     def get_user_pets(self, user_id):
         conn = self.get_conn()
@@ -30,7 +30,7 @@ class PetsRepo(PostgresRepo):
         pets = cur.fetchall()
         cur.close()
         conn.close()
-        return [Pet.from_db(p) for p in pets]
+        return [Pet.from_db(p).__dict__ for p in pets]
 
     def create_pet(self, pet):
         conn = self.get_conn()
@@ -54,7 +54,7 @@ class PetsRepo(PostgresRepo):
         conn.commit()
         cur.close()
         conn.close()
-        return pet
+        return pet.__dict__
 
     def set_pet_active(self, pet_id):
         existing = self.get_pet(pet_id)

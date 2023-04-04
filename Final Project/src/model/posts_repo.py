@@ -26,17 +26,12 @@ class PostsRepo(PostgresRepo):
             conn = self.get_conn()
             cur = conn.cursor()
             cur.execute('SELECT p.id, p.pet_id, p.message, p.photo, p.post_date FROM posts p JOIN friends f on f.friend_id = p.pet_id WHERE f.pet_id = %s ORDER BY p.post_date DESC LIMIT 10', (pet_id,))
-
-            posts = []
-            for post in cur:
-                posts.append(Post.from_db(post).__dict__)
-
+            posts_data = cur.fetchall()
+            posts = [Post.from_db(post).__dict__ for post in posts_data]
             cur.close()
             conn.close()
 
-            if len(posts) > 0:
-                return posts
-            return None
+            return posts
         except Exception as e:
             print(e)
 
@@ -56,33 +51,24 @@ class PostsRepo(PostgresRepo):
         except Exception as e:
             print(e)
 
-    def get_posts(self, pet_id):
+    def get_pet_posts(self, pet_id):
         try:
             conn = self.get_conn()
             cur = conn.cursor()
             cur.execute('SELECT id, pet_id, message, photo, post_date FROM posts WHERE pet_id = %s', (pet_id,))
-
-            posts = []
-            for post in cur:
-                posts.append(Post.from_db(post).__dict__)
-
+            posts_data = cur.fetchall()
+            posts = [Post.from_db(post).__dict__ for post in posts_data]
             cur.close()
             conn.close()
-
-            if len(posts) > 0:
-                return posts
-            return None
+            return posts
         except Exception as e:
             print(e)
 
     def delete_post(self, post_id):
-        try:
-            conn = self.get_conn()
-            cur = conn.cursor()
-            cur.execute('DELETE FROM posts WHERE id = %s', (post_id,))
-
-            conn.commit()
-            cur.close()
-            conn.close()
-        except Exception as e:
-            print(e)
+        conn = self.get_conn()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM posts WHERE id = %s', (post_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return post_id
