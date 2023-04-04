@@ -133,12 +133,12 @@ def posts(postId):
             post = posts_repo.get_post(postId)
             if not post:
                 return abort(404)
-            return json.dumps(post, indent=4, sort_keys=True, default=str)
+            return jsonify(post)
         elif request.method == 'POST':
             # need validation
             post = Post.from_dict(request.get_json())
             posts_repo.create_post(post)
-            return json.dumps(post, indent=4, sort_keys=True, default=str)
+            return jsonify(posts_repo.get_post(post.id))
         elif request.method == 'DELETE':
             delete = posts_repo.delete_post(postId)
             if not delete:
@@ -152,7 +152,7 @@ def posts(postId):
 def friendPosts(petId):
     try:
         posts = posts_repo.get_friend_posts(petId)
-        return json.dumps(posts, indent=4, sort_keys=True, default=str)
+        return jsonify(posts)
     except Exception as e:
         abort(500, {'message': str(e)})
 
@@ -161,12 +161,12 @@ def friendPosts(petId):
 def petPosts(petId):
     try:
         posts = posts_repo.get_pet_posts(petId)
-        return json.dumps(posts, indent=4, sort_keys=True, default=str)
+        return jsonify(posts)
     except Exception as e:
         abort(500, {'message': str(e)})
 
 pets_repo = PetsRepo()
-@app.route('/pets', methods=['GET','POST'], defaults={'petId':None})
+@app.route('/pets', methods=['GET','POST'], defaults={'petId': None})
 @app.route('/pets/<petId>', methods=['GET','PUT','DELETE'])
 def pets(petId):
     try:
@@ -175,15 +175,15 @@ def pets(petId):
                 pet = pets_repo.get_pet(petId)
                 if not pet:
                     return abort(404)
-                return json.dumps(pet, indent=4, sort_keys=True, default=str)
+                return jsonify(pet)
             else:
                 pets = pets_repo.get_pets()
-                return json.dumps(pets, indent=4, sort_keys=True, default=str)
+                return jsonify(pets)
         elif request.method == 'POST':
             # need validation
             pet = Pet.from_dict(request.get_json())
             pets_repo.create_pet(pet)
-            return json.dumps(pet, indent=4, sort_keys=True, default=str)
+            return jsonify(pets_repo.get_pet(pet.id))
         elif request.method == 'PUT':
             pet = Pet.from_dict(request.get_json())
             # need validation
@@ -192,7 +192,7 @@ def pets(petId):
             update = pets_repo.update_pet(pet)
             if not update:
                 return abort(404)
-            return json.dumps(update, indent=4, sort_keys=True, default=str)
+            return jsonify(update)
         elif request.method == 'DELETE':
             delete = pets_repo.delete_pet(petId)
             if not delete:
