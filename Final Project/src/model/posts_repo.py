@@ -1,20 +1,15 @@
 from src.model.repo import PostgresRepo
 from src.model.models import Post
-import uuid
-import datetime
 
 class PostsRepo(PostgresRepo):
 
-    def create_post(self, petId, message):
+    def create_post(self, post):
         try:
-            currentDate = datetime.datetime.now()
-            id = str(uuid.uuid4())
-
             conn = self.get_conn()
             cur = conn.cursor()
             cur.execute('INSERT INTO posts (id, pet_id, message, photo, post_date)'
                         'VALUES (%s,%s,%s,%s,%s)',
-                        (id, petId, message, "", currentDate))
+                        (post.id, post.pet_id, post.message, post.photo, post.post_date))
             conn.commit()
             cur.close()
             conn.close()
@@ -65,6 +60,10 @@ class PostsRepo(PostgresRepo):
             print(e)
 
     def delete_post(self, post_id):
+        existing = self.get_post(post_id)
+        if not existing:
+            return None
+
         conn = self.get_conn()
         cur = conn.cursor()
         cur.execute('DELETE FROM posts WHERE id = %s', (post_id,))

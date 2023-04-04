@@ -123,14 +123,6 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route("/posts", methods = ["POST"])
-def createNewPost():
-    petId = request.form["petId"]
-    message = request.form["message"]
-    repo.create_post(petId, message)
-    # TODO Finish success
-    return redirect(url_for('success'))
-
 # Posts
 posts_repo = PostsRepo()
 @app.route('/posts', methods=['POST'], defaults={'postId':None})

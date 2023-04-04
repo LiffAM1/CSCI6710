@@ -38,7 +38,6 @@ class Pet(object):
             pet_id = dict['id']
         else:
             pet_id = str(uuid.uuid4())
-        print(pet_id)
         return Pet(
             pet_id,
             dict['user_id'],
@@ -74,6 +73,20 @@ class Post:
     @staticmethod
     def from_db(record):
         return Post(record[0],record[1],record[2],record[3],record[4])
+
+    @staticmethod
+    def from_dict(dict):
+        post_id = None
+        if 'id' in dict:
+            post_id = dict['id']
+        else:
+            post_id= str(uuid.uuid4())
+        return Post(
+            post_id,
+            dict['pet_id'],
+            dict['message'],
+            dict['photo'],
+            dict['post_date'])
 
 class Reaction:
     def __init__(self, id, post_id, pet_id, type, message):
