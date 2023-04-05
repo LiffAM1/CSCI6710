@@ -1,8 +1,10 @@
 import json
 import os
-from flask import Flask, redirect, request, url_for, jsonify
-from src.model.repo import PostgresRepo
-from src.model.models import User
+from flask import Flask, redirect, request, url_for, abort, jsonify
+from src.model.users_repo import UsersRepo
+from src.model.pets_repo import PetsRepo
+from src.model.posts_repo import PostsRepo
+from src.model.models import User, Post, Pet
 
 from flask_login import (
     LoginManager,
@@ -15,22 +17,18 @@ from flask_login import (
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 
-# These need to be added as environment variables on your local machine
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+
+# Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = ("https://accounts.google.com/.well-known/openid-configuration")
 
-
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-
+repo = UsersRepo()
+client = WebApplicationClient(GOOGLE_CLIENT_ID)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-client = WebApplicationClient(GOOGLE_CLIENT_ID)
-
-repo = PostgresRepo()
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -39,7 +37,6 @@ def load_user(user_id):
 # Temp landing page 
 @app.route("/")
 def index():
-    print(current_user)
     if current_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
@@ -110,7 +107,7 @@ def callback():
         user = User(id=unique_id, name=users_name, email=users_email, is_active=True, is_authenticated=True)
         repo.create_user(user)
     else:
-        repo.set_active(user.id)
+        repo.set_user_active(user.id)
     user = repo.get_user(unique_id)
 
     # Begin user session by logging the user in
@@ -122,38 +119,87 @@ def callback():
 @app.route("/logout")
 @login_required
 def logout():
-    repo.set_inactive(current_user.id)
+    repo.set_user_inactive(current_user.id)
     logout_user()
     return redirect(url_for("index"))
 
-@app.route("/posts", methods = ["POST"])
-def createNewPost():
-    petId = request.form["petId"]
-    message = request.form["message"]
-    repo.create_post(petId, message)
-    # TODO Finish success
-    return redirect(url_for('success'))
+# Posts
+posts_repo = PostsRepo()
+@app.route('/posts', methods=['POST'], defaults={'postId':None})
+@app.route('/posts/<postId>', methods=['GET','DELETE'])
+def posts(postId):
+    try:
+        if request.method == 'GET': 
+            post = posts_repo.get_post(postId)
+            if not post:
+                return abort(404)
+            return jsonify(post)
+        elif request.method == 'POST':
+            # need validation
+            post = Post.from_dict(request.get_json())
+            posts_repo.create_post(post)
+            return jsonify(posts_repo.get_post(post.id))
+        elif request.method == 'DELETE':
+            delete = posts_repo.delete_post(postId)
+            if not delete:
+                return abort(404)
+            return ('', 204)
+    except Exception as e:
+        abort(500, {'message': str(e)})
 
-@app.route("/posts/friends/<petId>", methods = ["GET"])
-def getFriendsPosts(petId):
-    posts = repo.get_friend_posts(petId)
-    return json.dumps(posts, indent=4, sort_keys=True, default=str)
+# Friends
+@app.route("/friends/<petId>/posts", methods = ["GET"])
+def friendPosts(petId):
+    try:
+        posts = posts_repo.get_friend_posts(petId)
+        return jsonify(posts)
+    except Exception as e:
+        abort(500, {'message': str(e)})
 
-@app.route("/posts/<postId>", methods = ["GET"])
-def getPost(postId):
-    post = repo.get_post(postId)
-    return json.dumps(post, indent=4, sort_keys=True, default=str)
+# Pets
+@app.route("/pets/<petId>/posts", methods = ["GET"])
+def petPosts(petId):
+    try:
+        posts = posts_repo.get_pet_posts(petId)
+        return jsonify(posts)
+    except Exception as e:
+        abort(500, {'message': str(e)})
 
-@app.route("/posts/<postId>", methods = ["DELETE"])
-def deletePost(postId):
-    post = repo.delete_post(postId)
-    return redirect(url_for('success'))
-
-@app.route("/posts/pet/<petId>", methods = ["GET"])
-def getAllPetPosts(petId):
-    posts = repo.get_posts(petId)
-    return json.dumps(posts, indent=4, sort_keys=True, default=str)
-
+pets_repo = PetsRepo()
+@app.route('/pets', methods=['GET','POST'], defaults={'petId': None})
+@app.route('/pets/<petId>', methods=['GET','PUT','DELETE'])
+def pets(petId):
+    try:
+        if request.method == 'GET': 
+            if petId:
+                pet = pets_repo.get_pet(petId)
+                if not pet:
+                    return abort(404)
+                return jsonify(pet)
+            else:
+                pets = pets_repo.get_pets()
+                return jsonify(pets)
+        elif request.method == 'POST':
+            # need validation
+            pet = Pet.from_dict(request.get_json())
+            pets_repo.create_pet(pet)
+            return jsonify(pets_repo.get_pet(pet.id))
+        elif request.method == 'PUT':
+            pet = Pet.from_dict(request.get_json())
+            # need validation
+            if pet.id != petId:
+                return abort(400)
+            update = pets_repo.update_pet(pet)
+            if not update:
+                return abort(404)
+            return jsonify(update)
+        elif request.method == 'DELETE':
+            delete = pets_repo.delete_pet(petId)
+            if not delete:
+                return abort(404)
+            return ('', 204)
+    except Exception as e:
+        abort(500, {'message': str(e)})
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))
