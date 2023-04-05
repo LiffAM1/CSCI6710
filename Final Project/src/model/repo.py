@@ -3,7 +3,7 @@ import psycopg2
 import datetime
 import uuid
 
-from src.model.models import User, Post
+from src.model.models import User, Post, Friend
 
 class PostgresRepo:
     def __init__(self):
@@ -106,13 +106,11 @@ class PostgresRepo:
     def delete_pet(pet_id):
     def set_active(pet_id):
     def set_inactive(pet_id):
-
-    def get_friends(pet_id):
-    def get_non_friends(pet_id):
-    def add_friend(pet_id, friend_id):
-    def delete_friend(pet_id, friend_id):
     
     def update_post(post):
+
+           def add_friend(pet_id, friend_id):
+    def delete_friend(pet_id, friend_id):
 
     def get_post_reactions(post_id):
     def get_post_treats(post_id):
@@ -202,3 +200,49 @@ class PostgresRepo:
             conn.close()
         except Exception as e:
             print(e)
+
+
+    def get_friends(self, pet_id):
+        try:
+            conn = self.get_conn()
+            cur = conn.cursor()
+            cur.execute('SELECT id, pet_id, friend_id, friend_date FROM friends WHERE pet_id = %s', (pet_id,))
+
+            friends = []
+            for friend in cur:
+                friends.append(Friend.from_db(friend).__dict__)
+
+            cur.close()
+            conn.close()
+
+            if len(friends) > 0:
+                return friends
+            return None
+        except Exception as e:
+            print(e)
+
+
+    
+    def get_non_friends(self, pet_id):
+        try:
+            conn = self.get_conn()
+            cur = conn.cursor()
+            cur.execute('SELECT id, pet_id, friend_id, friend_date FROM friends WHERE pet_id != %s', (pet_id,))
+
+            nonfriends = []
+            for nonfriend in cur:
+                nonfriends.append(Friend.from_db(nonfriend).__dict__)
+
+            cur.close()
+            conn.close()
+
+            if len(nonfriends) > 0:
+                return nonfriends
+            return None
+        except Exception as e:
+            print(e)
+
+
+
+ 
+ 

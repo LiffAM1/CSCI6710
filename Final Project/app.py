@@ -154,6 +154,15 @@ def getAllPetPosts(petId):
     posts = repo.get_posts(petId)
     return json.dumps(posts, indent=4, sort_keys=True, default=str)
 
+@app.route("/friends/<petId>", methods = ["GET"])
+def getFriends(petId):
+    friends = repo.get_friends(petId)
+    return json.dumps(friends, indent=4, sort_keys=True, default=str)
+
+@app.route("/nonfriends/<petId>", methods = ["GET"])
+def getNonFriends(petId):
+    nonFriends = repo.get_non_friends(petId)
+    return json.dumps(nonFriends, indent=4, sort_keys=True, default=str)
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))
