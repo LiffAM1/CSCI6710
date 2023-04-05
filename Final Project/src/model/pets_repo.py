@@ -11,7 +11,7 @@ class PetsRepo(PostgresRepo):
         cur.close()
         conn.close()
         if pet:
-            return Pet.from_db(pet.__dict__)
+            return Pet.from_db(pet).__dict__
         return None
 
     def get_pets(self):

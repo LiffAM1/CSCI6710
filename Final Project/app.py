@@ -5,6 +5,7 @@ from src.model.users_repo import UsersRepo
 from src.model.pets_repo import PetsRepo
 from src.model.posts_repo import PostsRepo
 from src.model.models import User, Post, Pet
+import time
 
 from flask_login import (
     LoginManager,
@@ -19,6 +20,7 @@ import requests
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+app.config["IMAGE_UPLOADS"] = ".\src\photos"
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -147,6 +149,18 @@ def posts(postId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+@app.route('/posts/<postId>/photos', methods=['GET','POST'])
+def postPhotos(postId):
+    post = posts_repo.get_post(postId)
+    if not post:
+        abort(404)
+    if request.method == 'GET':
+        return jsonify([fn for fn in os.listdir(app.config["IMAGE_UPLOADS"]) if fn.startswith(postId)])
+    elif request.method == 'POST':
+        if request.files:
+            return upload_photo(request, postId)
+        return abort(400)
+
 # Friends
 @app.route("/friends/<petId>/posts", methods = ["GET"])
 def friendPosts(petId):
@@ -200,6 +214,25 @@ def pets(petId):
             return ('', 204)
     except Exception as e:
         abort(500, {'message': str(e)})
+
+@app.route('/pets/<petId>/photos', methods=['GET','POST'])
+def petPhotos(petId):
+    pet = pets_repo.get_pet(petId)
+    if not pet:
+        abort(404)
+    if request.method == 'GET':
+        return jsonify([fn for fn in os.listdir(app.config["IMAGE_UPLOADS"]) if fn.startswith(petId)])
+    elif request.method == 'POST':
+        if request.files:
+            return upload_photo(request, petId)
+        return abort(400)
+
+def upload_photo(request, resourceId):
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    image = request.files["file"]
+    filename = resourceId + '-' + ts + '-' + image.filename
+    image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
+    return jsonify(filename)
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))
