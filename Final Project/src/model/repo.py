@@ -33,9 +33,6 @@ class PostgresRepo:
     
     def update_post(post):
 
-           def add_friend(pet_id, friend_id):
-    def delete_friend(pet_id, friend_id):
-
     def get_post_reactions(post_id):
     def get_post_treats(post_id):
     def get_post_comments(post_id):
