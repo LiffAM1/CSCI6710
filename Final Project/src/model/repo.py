@@ -3,8 +3,6 @@ import psycopg2
 import datetime
 import uuid
 
-from src.model.models import User, Post, Friend
-
 class PostgresRepo:
     def __init__(self):
         self.host = os.environ['POSTGRES_HOST']
@@ -39,10 +37,3 @@ class PostgresRepo:
     def create_post_reaction(reaction):
     def delete_post_reaction(reaction_id):
     """
-
-
-    
-
-
- 
- 
