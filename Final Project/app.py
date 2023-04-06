@@ -4,7 +4,8 @@ from flask import Flask, redirect, request, url_for, abort, jsonify
 from src.model.users_repo import UsersRepo
 from src.model.pets_repo import PetsRepo
 from src.model.posts_repo import PostsRepo
-from src.model.models import User, Post, Pet
+from src.model.friends_repo import FriendsRepo
+from src.model.models import User, Post, Pet, Friend
 import time
 
 from flask_login import (
@@ -170,6 +171,31 @@ def friendPosts(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+friends_repo = FriendsRepo()
+
+@app.route("/friends/<petId>", methods = ["GET"])
+def getFriends(petId):
+    friends = friends_repo.get_friends(petId)
+    return json.dumps(friends, indent=4, sort_keys=True, default=str)
+
+@app.route("/nonfriends/<petId>", methods = ["GET"])
+def getNonFriends(petId):
+    nonFriends = friends_repo.get_non_friends(petId)
+    return json.dumps(nonFriends, indent=4, sort_keys=True, default=str)
+
+@app.route("/friends", methods = ["POST"])
+def createFriend():
+    friend = Friend.from_dict(request.get_json())
+    friends_repo.add_friend(friend)
+    return jsonify(friends_repo.get_friends(friend.pet_id))
+
+@app.route("/friends/<id>", methods = ["DELETE"])
+def removeFriend(id):
+    delete = friends_repo.delete_friend(id)
+    if not delete:
+        return abort(404)
+    return ('', 204)
+
 # Pets
 @app.route("/pets/<petId>/posts", methods = ["GET"])
 def petPosts(petId):
@@ -233,6 +259,8 @@ def upload_photo(request, resourceId):
     filename = resourceId + '-' + ts + '-' + image.filename
     image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
     return jsonify(filename)
+
+
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))

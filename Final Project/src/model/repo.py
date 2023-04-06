@@ -28,11 +28,6 @@ class PostgresRepo:
     def get_pets_by_species(species):
     def set_active(pet_id):
     def set_inactive(pet_id):
-
-    def get_friends(pet_id):
-    def get_non_friends(pet_id):
-    def add_friend(pet_id, friend_id):
-    def delete_friend(pet_id, friend_id):
     
     def update_post(post):
 
@@ -42,4 +37,3 @@ class PostgresRepo:
     def create_post_reaction(reaction):
     def delete_post_reaction(reaction_id):
     """
-
