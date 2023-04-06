@@ -1,3 +1,5 @@
+import time
+import uuid
 import json
 import os
 from flask import Flask, redirect, request, url_for, abort, jsonify
@@ -150,17 +152,22 @@ def posts(postId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
-@app.route('/posts/<postId>/photos', methods=['GET','POST'])
-def postPhotos(postId):
-    post = posts_repo.get_post(postId)
-    if not post:
-        abort(404)
-    if request.method == 'GET':
-        return jsonify([fn for fn in os.listdir(app.config["IMAGE_UPLOADS"]) if fn.startswith(postId)])
-    elif request.method == 'POST':
+@app.route('/posts/<postId>/photos', methods=['POST'])
+def createPostPhotos(postId):
+    try:
         if request.files:
-            return upload_photo(request, postId)
-        return abort(400)
+            post = posts_repo.get_post_object(postId)
+            if not post:
+                return abort(404)
+            
+            response = upload_photo(request, postId, 'post')
+            post.photo = response['filenames'][0]
+            posts_repo.update_post(post)
+
+            return jsonify(response)
+        abort(400)
+    except Exception as e:
+        abort(500, {'message': str(e)})
 
 # Friends
 @app.route("/friends/<petId>/posts", methods = ["GET"])
@@ -241,24 +248,51 @@ def pets(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
-@app.route('/pets/<petId>/photos', methods=['GET','POST'])
+@app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 def petPhotos(petId):
-    pet = pets_repo.get_pet(petId)
-    if not pet:
-        abort(404)
-    if request.method == 'GET':
-        return jsonify([fn for fn in os.listdir(app.config["IMAGE_UPLOADS"]) if fn.startswith(petId)])
-    elif request.method == 'POST':
-        if request.files:
-            return upload_photo(request, petId)
-        return abort(400)
+    try:
+        if request.method == 'GET':
+            pet = pets_repo.get_pet(petId)
+            if not pet:
+                abort(404)
+            return jsonify(make_photo_response(pet.id, pet.pics))
+        elif request.method == 'POST':
+            pet = pets_repo.get_pet(petId)
+            if not pet:
+                abort(404)
+            if request.files:
+                response = upload_photo(request, petId, 'pet')
+                pets_repo.add_pet_photo(petId, response['filenames'][0])
+                return jsonify(response)
+            abort(400)
+    except Exception as e:
+        abort(500, {'message': str(e)})
+        
 
-def upload_photo(request, resourceId):
+@app.route('/pets/<petId>/photos/<filename>', methods=['DELETE'])
+def deletePetPhotos(petId, filename):
+    try:
+        pet = pets_repo.get_pet(petId)
+        if not pet:
+            abort(404)
+        deleted = pets_repo.delete_pet_photo(petId, filename)
+        if not deleted:
+            abort(400)
+        os.remove(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+        return ('', 204)
+    except Exception as e:
+        abort(500, {'message': str(e)})
+
+
+def upload_photo(request, resourceId, resourceType):
     ts = time.strftime("%Y%m%d-%H%M%S")
     image = request.files["file"]
-    filename = resourceId + '-' + ts + '-' + image.filename
+    filename = resourceId + '-' + ts + '-' + resourceType + '-' + image.filename
     image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
-    return jsonify(filename)
+    return make_photo_response(resourceId,[filename])
+
+def make_photo_response(resourceId, filenames):
+    return {'resourceId': resourceId, 'filenames': filenames}
 
 
 
