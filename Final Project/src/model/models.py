@@ -64,6 +64,19 @@ class Friend:
     def from_db(record):
         return Friend(record[0],record[1],record[2],record[3])
 
+    @staticmethod
+    def from_dict(dict):
+        id = None
+        if 'id' in dict:
+            id = dict['id']
+        else:
+            id = str(uuid.uuid4())
+        return Friend(
+            id,
+            dict['pet_id'],
+            dict['friend_id'],
+            dict['friend_date'])
+
 class Post:
     def __init__(self, id, pet_id, message, photo, post_date):
         self.id = id
