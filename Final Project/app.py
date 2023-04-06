@@ -1,5 +1,4 @@
 import time
-import datetime
 import uuid
 import json
 import os
@@ -153,12 +152,19 @@ def posts(postId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
-@app.route('/posts/photos', methods=['POST'], defaults={'postId': None})
-def createPostPhotos():
+@app.route('/posts/<postId>/photos', methods=['POST'])
+def createPostPhotos(postId):
     try:
-        resourceId = str(uuid.uuid4())
         if request.files:
-            return jsonify(upload_photo(request, resourceId, 'post'))
+            post = posts_repo.get_post_object(postId)
+            if not post:
+                return abort(404)
+            
+            response = upload_photo(request, postId, 'post')
+            post.photo = response['filenames'][0]
+            posts_repo.update_post(post)
+
+            return jsonify(response)
         abort(400)
     except Exception as e:
         abort(500, {'message': str(e)})
@@ -242,7 +248,6 @@ def pets(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
-@app.route('/pets/photos', methods=['POST'], defaults={'petId': None})
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 def petPhotos(petId):
     try:
@@ -252,23 +257,14 @@ def petPhotos(petId):
                 abort(404)
             return jsonify(make_photo_response(pet.id, pet.pics))
         elif request.method == 'POST':
-            # If an existing pet Id was passed, append it to the filename and then add the photo to the pet
-            # Otherwise, generate a new resource Id, which will be passed back with the response
-            resourceId = str(uuid.uuid4())
-            if petId:
-                resourceId = petId
-                pet = pets_repo.get_pet(petId)
-                if not pet:
-                    abort(404)
-                if request.files:
-                    response = upload_photo(request, resourceId, 'pet')
-                    pets_repo.add_pet_photo(petId, response['filenames'][0])
-                    return jsonify(response)
-                abort(400)
-            else:
-                if request.files:
-                    return jsonify(upload_photo(request, resourceId, 'pet'))
-                abort(400)
+            pet = pets_repo.get_pet(petId)
+            if not pet:
+                abort(404)
+            if request.files:
+                response = upload_photo(request, petId, 'pet')
+                pets_repo.add_pet_photo(petId, response['filenames'][0])
+                return jsonify(response)
+            abort(400)
     except Exception as e:
         abort(500, {'message': str(e)})
         
