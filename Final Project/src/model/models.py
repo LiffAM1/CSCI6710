@@ -112,3 +112,17 @@ class Reaction:
     @staticmethod
     def from_db(record):
         return Reaction(record[0],record[1],record[2],record[3],record[4])
+
+    @staticmethod
+    def from_dict(dict):
+        reaction_id = None
+        if 'id' in dict:
+            reaction_id = dict['id']
+        else:
+            reaction_id= str(uuid.uuid4())
+        return Reaction(
+            reaction_id,
+            dict['post_id'],
+            dict['pet_id'],
+            dict['type'],
+            dict['message'])

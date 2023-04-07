@@ -5,7 +5,8 @@ from src.model.users_repo import UsersRepo
 from src.model.pets_repo import PetsRepo
 from src.model.posts_repo import PostsRepo
 from src.model.friends_repo import FriendsRepo
-from src.model.models import User, Post, Pet, Friend
+from src.model.reactions_repo import ReactionsRepo
+from src.model.models import User, Post, Pet, Friend, Reaction
 import time
 
 from flask_login import (
@@ -259,6 +260,39 @@ def upload_photo(request, resourceId):
     filename = resourceId + '-' + ts + '-' + image.filename
     image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
     return jsonify(filename)
+
+
+#Reactions
+reactions_repo = ReactionsRepo()
+@app.route("/reactions/<postId>", methods = ["GET"])
+def get_post_reactions(postId):
+    reactions = reactions_repo.get_post_reactions(postId)
+    return json.dumps(reactions, indent=4, sort_keys=True, default=str)
+
+@app.route("/reactions/treats/<postId>", methods = ["GET"])
+def get_post_treats(postId):
+    treats = reactions_repo.get_post_treats(postId)
+    return json.dumps(treats, indent=4, sort_keys=True, default=str)
+
+@app.route("/reactions/comments/<postId>", methods = ["GET"])
+def get_post_comments(postId):
+    comments = reactions_repo.get_post_comments(postId)
+    return json.dumps(comments, indent=4, sort_keys=True, default=str)
+
+@app.route("/reactions", methods = ["POST"])
+def createReaction():
+    reaction = Reaction.from_dict(request.get_json())
+    reactions_repo.create_post_reaction(reaction)
+    return jsonify(reactions_repo.get_post_reactions(reaction.post_id))
+
+@app.route("/reactions/<reactionId>", methods = ["DELETE"])
+def removeReaction(reactionId):
+    delete = reactions_repo.delete_post_reaction(reactionId)
+    if not delete:
+        return abort(404)
+    return ('', 204)
+
+
 
 
 

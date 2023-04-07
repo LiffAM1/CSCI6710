@@ -31,9 +31,5 @@ class PostgresRepo:
     
     def update_post(post):
 
-    def get_post_reactions(post_id):
-    def get_post_treats(post_id):
-    def get_post_comments(post_id):
-    def create_post_reaction(reaction):
-    def delete_post_reaction(reaction_id):
+
     """
