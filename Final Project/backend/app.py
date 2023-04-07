@@ -3,11 +3,11 @@ import uuid
 import json
 import os
 from flask import Flask, redirect, request, url_for, abort, jsonify
-from src.model.users_repo import UsersRepo
-from src.model.pets_repo import PetsRepo
-from src.model.posts_repo import PostsRepo
-from src.model.friends_repo import FriendsRepo
-from src.model.models import User, Post, Pet, Friend
+from model.users_repo import UsersRepo
+from model.pets_repo import PetsRepo
+from model.posts_repo import PostsRepo
+from model.friends_repo import FriendsRepo
+from model.models import User, Post, Pet, Friend
 import time
 
 from flask_login import (

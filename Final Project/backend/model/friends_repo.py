@@ -1,5 +1,5 @@
-from src.model.repo import PostgresRepo
-from src.model.models import Pet
+from model.repo import PostgresRepo
+from model.models import Pet
 
 class FriendsRepo(PostgresRepo):
     def get_friends(self, pet_id):
