@@ -7,7 +7,8 @@ from model.users_repo import UsersRepo
 from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
 from model.friends_repo import FriendsRepo
-from model.models import User, Post, Pet, Friend
+from model.reactions_repo import ReactionsRepo
+from model.models import User, Post, Pet, Friend, Reaction
 import time
 
 from flask_login import (
@@ -28,18 +29,22 @@ app.config["IMAGE_UPLOADS"] = ".\src\photos"
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
-GOOGLE_DISCOVERY_URL = ("https://accounts.google.com/.well-known/openid-configuration")
+GOOGLE_DISCOVERY_URL = (
+    "https://accounts.google.com/.well-known/openid-configuration")
 
 repo = UsersRepo()
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return repo.get_user(user_id)
 
-# Temp landing page 
+# Temp landing page
+
+
 @app.route("/")
 def index():
     if current_user.is_authenticated:
@@ -53,6 +58,8 @@ def index():
         return '<a class="button" href="/login">Google Login</a>'
 
 # Utility method to get Google SSO endpoint information
+
+
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
@@ -68,6 +75,7 @@ def login():
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
+
 
 @app.route("/login/callback")
 def callback():
@@ -109,7 +117,8 @@ def callback():
 
     user = repo.get_user(unique_id)
     if not user:
-        user = User(id=unique_id, name=users_name, email=users_email, is_active=True, is_authenticated=True)
+        user = User(id=unique_id, name=users_name, email=users_email,
+                    is_active=True, is_authenticated=True)
         repo.create_user(user)
     else:
         repo.set_user_active(user.id)
@@ -121,6 +130,7 @@ def callback():
     # Send user back to homepage
     return redirect(url_for("index"))
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -128,13 +138,16 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+
 # Posts
 posts_repo = PostsRepo()
-@app.route('/posts', methods=['POST'], defaults={'postId':None})
-@app.route('/posts/<postId>', methods=['GET','DELETE'])
+
+
+@app.route('/posts', methods=['POST'], defaults={'postId': None})
+@app.route('/posts/<postId>', methods=['GET', 'DELETE'])
 def posts(postId):
     try:
-        if request.method == 'GET': 
+        if request.method == 'GET':
             post = posts_repo.get_post(postId)
             if not post:
                 return abort(404)
@@ -152,6 +165,7 @@ def posts(postId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+
 @app.route('/posts/<postId>/photos', methods=['POST'])
 def createPostPhotos(postId):
     try:
@@ -159,7 +173,7 @@ def createPostPhotos(postId):
             post = posts_repo.get_post_object(postId)
             if not post:
                 return abort(404)
-            
+
             response = upload_photo(request, postId, 'post')
             post.photo = response['filenames'][0]
             posts_repo.update_post(post)
@@ -170,7 +184,9 @@ def createPostPhotos(postId):
         abort(500, {'message': str(e)})
 
 # Friends
-@app.route("/friends/<petId>/posts", methods = ["GET"])
+
+
+@app.route("/friends/<petId>/posts", methods=["GET"])
 def friendPosts(petId):
     try:
         posts = posts_repo.get_friend_posts(petId)
@@ -178,25 +194,30 @@ def friendPosts(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+
 friends_repo = FriendsRepo()
 
-@app.route("/friends/<petId>", methods = ["GET"])
+
+@app.route("/friends/<petId>", methods=["GET"])
 def getFriends(petId):
     friends = friends_repo.get_friends(petId)
     return json.dumps(friends, indent=4, sort_keys=True, default=str)
 
-@app.route("/nonfriends/<petId>", methods = ["GET"])
+
+@app.route("/nonfriends/<petId>", methods=["GET"])
 def getNonFriends(petId):
     nonFriends = friends_repo.get_non_friends(petId)
     return json.dumps(nonFriends, indent=4, sort_keys=True, default=str)
 
-@app.route("/friends", methods = ["POST"])
+
+@app.route("/friends", methods=["POST"])
 def createFriend():
     friend = Friend.from_dict(request.get_json())
     friends_repo.add_friend(friend)
     return jsonify(friends_repo.get_friends(friend.pet_id))
 
-@app.route("/friends/<id>", methods = ["DELETE"])
+
+@app.route("/friends/<id>", methods=["DELETE"])
 def removeFriend(id):
     delete = friends_repo.delete_friend(id)
     if not delete:
@@ -204,7 +225,9 @@ def removeFriend(id):
     return ('', 204)
 
 # Pets
-@app.route("/pets/<petId>/posts", methods = ["GET"])
+
+
+@app.route("/pets/<petId>/posts", methods=["GET"])
 def petPosts(petId):
     try:
         posts = posts_repo.get_pet_posts(petId)
@@ -212,12 +235,15 @@ def petPosts(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+
 pets_repo = PetsRepo()
-@app.route('/pets', methods=['GET','POST'], defaults={'petId': None})
-@app.route('/pets/<petId>', methods=['GET','PUT','DELETE'])
+
+
+@app.route('/pets', methods=['GET', 'POST'], defaults={'petId': None})
+@app.route('/pets/<petId>', methods=['GET', 'PUT', 'DELETE'])
 def pets(petId):
     try:
-        if request.method == 'GET': 
+        if request.method == 'GET':
             if petId:
                 pet = pets_repo.get_pet(petId)
                 if not pet:
@@ -248,6 +274,7 @@ def pets(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
+
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 def petPhotos(petId):
     try:
@@ -267,7 +294,7 @@ def petPhotos(petId):
             abort(400)
     except Exception as e:
         abort(500, {'message': str(e)})
-        
+
 
 @app.route('/pets/<petId>/photos/<filename>', methods=['DELETE'])
 def deletePetPhotos(petId, filename):
@@ -288,12 +315,46 @@ def upload_photo(request, resourceId, resourceType):
     ts = time.strftime("%Y%m%d-%H%M%S")
     image = request.files["file"]
     filename = resourceId + '-' + ts + '-' + resourceType + '-' + image.filename
-    image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
-    return make_photo_response(resourceId,[filename])
+    image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+    return make_photo_response(resourceId, [filename])
+
 
 def make_photo_response(resourceId, filenames):
     return {'resourceId': resourceId, 'filenames': filenames}
 
+
+# Reactions
+reactions_repo = ReactionsRepo()
+
+
+@app.route("/reactions/<postId>", methods=["GET"])
+def get_post_reactions(postId):
+    reactions = reactions_repo.get_post_reactions(postId)
+    return json.dumps(reactions, indent=4, sort_keys=True, default=str)
+
+
+@app.route("/reactions/treats/<postId>", methods=["GET"])
+def get_post_treats(postId):
+    treats = reactions_repo.get_post_treats(postId)
+    return json.dumps(treats, indent=4, sort_keys=True, default=str)
+
+@app.route("/reactions/comments/<postId>", methods = ["GET"])
+def get_post_comments(postId):
+    comments = reactions_repo.get_post_comments(postId)
+    return json.dumps(comments, indent=4, sort_keys=True, default=str)
+
+@app.route("/reactions", methods = ["POST"])
+def createReaction():
+    reaction = Reaction.from_dict(request.get_json())
+    reactions_repo.create_post_reaction(reaction)
+    return jsonify(reactions_repo.get_post_reactions(reaction.post_id))
+
+@app.route("/reactions/<reactionId>", methods = ["DELETE"])
+def removeReaction(reactionId):
+    delete = reactions_repo.delete_post_reaction(reactionId)
+    if not delete:
+        return abort(404)
+    return ('', 204)
 
 
 if __name__ == "__main__":

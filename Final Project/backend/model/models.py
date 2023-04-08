@@ -1,4 +1,6 @@
 import uuid
+
+
 class User:
     def __init__(self, id, name, email, is_active, is_authenticated):
         self.id = id
@@ -12,7 +14,8 @@ class User:
 
     @staticmethod
     def from_db(record):
-        return User(record[0],record[1],record[2],record[3],record[4])
+        return User(record[0], record[1], record[2], record[3], record[4])
+
 
 class Pet(object):
     def __init__(self, id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos):
@@ -25,12 +28,12 @@ class Pet(object):
         self.profile_pic = profile_pic
         self.birthday = birthday
         self.gender = gender
-        self.is_active = is_active 
+        self.is_active = is_active
         self.photos = photos
 
     @staticmethod
     def from_db(record):
-        return Pet(record[0],record[1],record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10])
+        return Pet(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10])
 
     @staticmethod
     def from_dict(dict):
@@ -62,7 +65,7 @@ class Friend:
 
     @staticmethod
     def from_db(record):
-        return Friend(record[0],record[1],record[2],record[3])
+        return Friend(record[0], record[1], record[2], record[3])
 
     @staticmethod
     def from_dict(dict):
@@ -77,17 +80,18 @@ class Friend:
             dict['friend_id'],
             dict['friend_date'])
 
+
 class Post:
     def __init__(self, id, pet_id, message, photo, post_date):
         self.id = id
         self.pet_id = pet_id
         self.message = message
-        self.photo = photo 
+        self.photo = photo
         self.post_date = post_date
 
     @staticmethod
     def from_db(record):
-        return Post(record[0],record[1],record[2],record[3],record[4])
+        return Post(record[0], record[1], record[2], record[3], record[4])
 
     @staticmethod
     def from_dict(dict):
@@ -95,7 +99,7 @@ class Post:
         if 'id' in dict:
             post_id = dict['id']
         else:
-            post_id= str(uuid.uuid4())
+            post_id = str(uuid.uuid4())
         return Post(
             post_id,
             dict['pet_id'],
@@ -103,14 +107,29 @@ class Post:
             dict['photo'],
             dict['post_date'])
 
+
 class Reaction:
     def __init__(self, id, post_id, pet_id, type, message):
         self.id = id
-        self.post_id = post_id 
+        self.post_id = post_id
         self.pet_id = pet_id
         self.type = type
         self.message = message
 
     @staticmethod
     def from_db(record):
-        return Reaction(record[0],record[1],record[2],record[3],record[4])
+        return Reaction(record[0], record[1], record[2], record[3], record[4])
+
+    @staticmethod
+    def from_dict(dict):
+        reaction_id = None
+        if 'id' in dict:
+            reaction_id = dict['id']
+        else:
+            reaction_id = str(uuid.uuid4())
+        return Reaction(
+            reaction_id,
+            dict['post_id'],
+            dict['pet_id'],
+            dict['type'],
+            dict['message'])
