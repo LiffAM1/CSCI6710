@@ -1,5 +1,5 @@
-from src.model.repo import PostgresRepo
-from src.model.models import Post
+from model.repo import PostgresRepo
+from model.models import Post
 
 class PostsRepo(PostgresRepo):
 
