@@ -1,5 +1,5 @@
-from src.model.repo import PostgresRepo
-from src.model.models import User 
+from model.repo import PostgresRepo
+from model.models import User 
 
 class UsersRepo(PostgresRepo):
     def get_user(self, id):

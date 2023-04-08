@@ -1,12 +1,12 @@
 import json
 import os
 from flask import Flask, redirect, request, url_for, abort, jsonify
-from src.model.users_repo import UsersRepo
-from src.model.pets_repo import PetsRepo
-from src.model.posts_repo import PostsRepo
-from src.model.friends_repo import FriendsRepo
-from src.model.reactions_repo import ReactionsRepo
-from src.model.models import User, Post, Pet, Friend, Reaction
+from model.users_repo import UsersRepo
+from model.pets_repo import PetsRepo
+from model.posts_repo import PostsRepo
+from model.friends_repo import FriendsRepo
+from model.reactions_repo import ReactionsRepo
+from model.models import User, Post, Pet, Friend, Reaction
 import time
 
 from flask_login import (
@@ -261,8 +261,7 @@ def upload_photo(request, resourceId):
     image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename)) 
     return jsonify(filename)
 
-
-#Reactions
+# Reactions
 reactions_repo = ReactionsRepo()
 @app.route("/reactions/<postId>", methods = ["GET"])
 def get_post_reactions(postId):
@@ -291,10 +290,6 @@ def removeReaction(reactionId):
     if not delete:
         return abort(404)
     return ('', 204)
-
-
-
-
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))

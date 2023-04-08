@@ -15,7 +15,7 @@ class User:
         return User(record[0],record[1],record[2],record[3],record[4])
 
 class Pet(object):
-    def __init__(self, id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active):
+    def __init__(self, id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos):
         self.id = id
         self.user_id = user_id
         self.name = name
@@ -26,10 +26,11 @@ class Pet(object):
         self.birthday = birthday
         self.gender = gender
         self.is_active = is_active 
+        self.photos = photos
 
     @staticmethod
     def from_db(record):
-        return Pet(record[0],record[1],record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9])
+        return Pet(record[0],record[1],record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10])
 
     @staticmethod
     def from_dict(dict):
@@ -48,7 +49,8 @@ class Pet(object):
             dict['profile_pic'],
             dict['birthday'],
             dict['gender'],
-            dict['is_active'])
+            dict['is_active'],
+            dict['photos'])
 
 
 class Friend:

@@ -1,17 +1,20 @@
-from src.model.repo import PostgresRepo
-from src.model.models import Pet 
+from model.repo import PostgresRepo
+from model.models import Pet 
 
 class PetsRepo(PostgresRepo):
 
     def get_pet(self, id):
+        return self.get_pet_object(id).__dict__
+
+    def get_pet_object(self, id):
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active FROM pets WHERE id = %s', (id,))
+        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos FROM pets WHERE id = %s', (id,))
         pet = cur.fetchone()
         cur.close()
         conn.close()
         if pet:
-            return Pet.from_db(pet).__dict__
+            return Pet.from_db(pet)
         return None
 
     def get_pets(self):
@@ -49,8 +52,8 @@ class PetsRepo(PostgresRepo):
 
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('UPDATE pets SET name = %s, nicknames = %s, species = %s, breed = %s, profile_pic = %s, birthday = %s, gender = %s, is_active = %s WHERE id = %s',
-                    (pet.name, pet.nicknames, pet.species, pet.breed, pet.profile_pic, pet.birthday, pet.gender, pet.is_active, pet.id))
+        cur.execute('UPDATE pets SET name = %s, nicknames = %s, species = %s, breed = %s, profile_pic = %s, birthday = %s, gender = %s, is_active = %s, photos = %s WHERE id = %s',
+                    (pet.name, pet.nicknames, pet.species, pet.breed, pet.profile_pic, pet.birthday, pet.gender, pet.is_active, pet.photos, pet.id))
         conn.commit()
         cur.close()
         conn.close()
@@ -80,6 +83,30 @@ class PetsRepo(PostgresRepo):
         conn.commit()
         cur.close()
         return self.get_pet(pet_id)
+
+    def add_pet_photo(self, pet_id, filename):
+        existing = self.get_pet_object(pet_id)
+        if not existing:
+            return None
+
+        if not existing.photos:
+            existing.photos = []
+        existing.photos.append(filename)
+
+        self.update_pet(existing)
+
+        return existing.__dict__
+
+    def delete_pet_photo(self, pet_id, filename):
+        existing = self.get_pet_object(pet_id)
+        if not existing or filename not in existing.photos:
+            return None
+
+        existing.photos.remove(filename)
+
+        self.update_pet(existing)
+
+        return existing.__dict__
 
     def delete_pet(self, pet_id):
         existing = self.get_pet(pet_id)

@@ -1,5 +1,5 @@
-from src.model.repo import PostgresRepo
-from src.model.models import Reaction
+from model.repo import PostgresRepo
+from model.models import Reaction
 
 class ReactionsRepo(PostgresRepo):
 
