@@ -1,5 +1,4 @@
 import time
-import uuid
 import json
 import os
 from flask import Flask, redirect, request, url_for, abort, jsonify
@@ -8,8 +7,9 @@ from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
 from model.friends_repo import FriendsRepo
 from model.reactions_repo import ReactionsRepo
-from model.models import User, Post, Pet, Friend, Reaction
+from model.models import User, Post, Pet, Friend
 import time
+from flask_cors import CORS, cross_origin
 
 from flask_login import (
     LoginManager,
@@ -25,6 +25,8 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 app.config["IMAGE_UPLOADS"] = ".\src\photos"
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -43,23 +45,6 @@ def load_user(user_id):
     return repo.get_user(user_id)
 
 # Temp landing page
-
-
-@app.route("/")
-def index():
-    if current_user.is_authenticated:
-        return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
-            )
-        )
-    else:
-        return '<a class="button" href="/login">Google Login</a>'
-
-# Utility method to get Google SSO endpoint information
-
-
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
