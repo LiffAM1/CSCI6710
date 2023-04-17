@@ -16,8 +16,8 @@ class PostsRepo(PostgresRepo):
     def get_friend_posts(self, pet_id):
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('SELECT p.id, p.pet_id, p.message, p.photo, p.post_date FROM posts p'
-                    'JOIN friends f on f.friend_id = p.pet_id'
+        cur.execute('SELECT p.id, p.pet_id, p.message, p.photo, p.post_date FROM posts p '
+                    'JOIN friends f on f.friend_id = p.pet_id '
                     'WHERE f.pet_id = %s ORDER BY p.post_date DESC LIMIT 10', (pet_id,))
         posts_data = cur.fetchall()
         posts = [Post.from_db(post).__dict__ for post in posts_data]

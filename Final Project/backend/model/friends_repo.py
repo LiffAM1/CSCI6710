@@ -6,14 +6,17 @@ class FriendsRepo(PostgresRepo):
         try:
             conn = self.get_conn()
             cur = conn.cursor()
-            cur.execute('SELECT p.id, p.user_id, p.name, p.nicknames, p.species, p.breed, p.profile_pic, p.birthday, p.gender, p.is_active FROM pets p JOIN friends f ON p.id = f.friend_id WHERE f.pet_id = %s', (pet_id,))
+            cur.execute('SELECT p.id, p.user_id, p.name, p.nicknames, p.species, p.breed, p.profile_pic, p.birthday, p.gender, p.is_active, p.photos FROM pets p JOIN friends f ON p.id = f.friend_id WHERE f.pet_id = %s', (pet_id,))
 
             friends = []
             for friend in cur:
+                print(friend)
                 friends.append(Pet.from_db(friend).__dict__)
 
             cur.close()
             conn.close()
+
+            
 
             if len(friends) > 0:
                 return friends

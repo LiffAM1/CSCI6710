@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom';
 import Layout from './Layout';
 import Home from './Home';
+import Feed from './Feed';
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="feed" element={<Feed />} />
         </Route>
       </Routes>
     </BrowserRouter>
