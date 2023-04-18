@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 
-
 function Home() {
   const [cookies, setCookie] = useCookies(['session_id']);
   const [session, setSession] = useState(false);
