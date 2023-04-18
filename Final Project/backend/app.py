@@ -1,7 +1,7 @@
 import time
 import json
 import os
-from flask import Flask, redirect, request, url_for, abort, jsonify
+from flask import Flask, redirect, request, url_for, abort, jsonify, make_response
 from model.users_repo import UsersRepo
 from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
@@ -17,6 +17,7 @@ from flask_login import (
     login_required,
     login_user,
     logout_user,
+    login_fresh
 )
 
 from oauthlib.oauth2 import WebApplicationClient
@@ -25,8 +26,7 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 app.config["IMAGE_UPLOADS"] = ".\src\photos"
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app, supports_credentials=True)
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -48,6 +48,12 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
+@app.route("/session/<id>")
+def session(id):
+    user = load_user(id)
+    if not user.is_active:
+        return jsonify(False)
+    return jsonify(True)
 
 @app.route("/login")
 def login():
@@ -110,10 +116,12 @@ def callback():
     user = repo.get_user(unique_id)
 
     # Begin user session by logging the user in
-    login_user(user)
+    login_user(user, remember=True)
+    resp = make_response(redirect("http://localhost:3000"))
+    resp.set_cookie('session_id', current_user.id)
 
     # Send user back to homepage
-    return redirect(url_for("index"))
+    return resp
 
 
 @app.route("/logout")
@@ -121,7 +129,9 @@ def callback():
 def logout():
     repo.set_user_inactive(current_user.id)
     logout_user()
-    return redirect(url_for("index"))
+    resp = make_response(redirect("http://localhost:3000"))
+    resp.set_cookie('session_id', '', expires=0)
+    return resp
 
 
 # Posts
