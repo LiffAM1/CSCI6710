@@ -7,7 +7,7 @@ from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
 from model.friends_repo import FriendsRepo
 from model.reactions_repo import ReactionsRepo
-from model.models import User, Post, Pet, Friend
+from model.models import User, Post, Pet, Friend, Reaction
 import time
 from flask_cors import CORS, cross_origin
 
