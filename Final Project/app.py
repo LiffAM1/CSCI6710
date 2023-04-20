@@ -51,7 +51,21 @@ def index():
         return redirect('/signin')
 
     user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    if not pets:
+        return redirect('/getstarted')
+    
     return render_template('index.html', user = user.name)
+
+@app.route("/getstarted")
+@login_required
+def get_started():
+    user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    # If they already have pets set up, just go to their feed
+    if pets:
+        redirect('/')
+    return render_template('getstarted.html', user = user.name)
 
 @app.route("/signin")
 def signin():
