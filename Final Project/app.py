@@ -1,7 +1,7 @@
 import time
 import json
 import os
-from flask import Flask, redirect, request, url_for, abort, jsonify, make_response
+from flask import Flask, redirect, request, url_for, abort, jsonify, make_response, render_template
 from model.users_repo import UsersRepo
 from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
@@ -9,7 +9,6 @@ from model.friends_repo import FriendsRepo
 from model.reactions_repo import ReactionsRepo
 from model.models import User, Post, Pet, Friend, Reaction
 import time
-from flask_cors import CORS, cross_origin
 
 from flask_login import (
     LoginManager,
@@ -17,7 +16,6 @@ from flask_login import (
     login_required,
     login_user,
     logout_user,
-    login_fresh
 )
 
 from oauthlib.oauth2 import WebApplicationClient
@@ -25,8 +23,7 @@ import requests
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-app.config["IMAGE_UPLOADS"] = ".\src\photos"
-CORS(app, supports_credentials=True)
+app.config["IMAGE_UPLOADS"] = ".\photos"
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -48,12 +45,10 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-@app.route("/session/<id>")
-def session(id):
-    user = load_user(id)
-    if not user.is_active:
-        return jsonify(False)
-    return jsonify(True)
+@app.route("/")
+def index():
+    test = "Templating test"
+    return render_template('index.html', test = test)
 
 @app.route("/login")
 def login():
@@ -117,11 +112,8 @@ def callback():
 
     # Begin user session by logging the user in
     login_user(user, remember=True)
-    resp = make_response(redirect("http://localhost:3000"))
-    resp.set_cookie('session_id', current_user.id)
 
-    # Send user back to homepage
-    return resp
+    return redirect("/")
 
 
 @app.route("/logout")
@@ -129,9 +121,7 @@ def callback():
 def logout():
     repo.set_user_inactive(current_user.id)
     logout_user()
-    resp = make_response(redirect("http://localhost:3000"))
-    resp.set_cookie('session_id', '', expires=0)
-    return resp
+    return redirect("/")
 
 
 # Posts
