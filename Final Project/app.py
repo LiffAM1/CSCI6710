@@ -47,8 +47,15 @@ def get_google_provider_cfg():
 
 @app.route("/")
 def index():
-    test = "Templating test"
-    return render_template('index.html', test = test)
+    if not current_user or not current_user.is_active:
+        return redirect('/signin')
+
+    user = load_user(current_user.id)
+    return render_template('index.html', user = user.name)
+
+@app.route("/signin")
+def signin():
+    return render_template('signin.html')
 
 @app.route("/login")
 def login():
