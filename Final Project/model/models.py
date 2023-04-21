@@ -49,11 +49,11 @@ class Pet(object):
             dict['nicknames'],
             dict['species'],
             dict['breed'],
-            dict['profile_pic'],
+            "default_profile.png",
             dict['birthday'],
             dict['gender'],
-            dict['is_active'],
-            dict['photos'])
+            True,
+            ["default_profile.png"])
 
 
 class Friend:

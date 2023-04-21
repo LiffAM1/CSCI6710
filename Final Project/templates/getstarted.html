@@ -23,14 +23,14 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
                                             <div class="form-outline">
-                                                <input type="text" id="firstName" class="form-control form-control-lg" />
-                                                <label class="form-label" for="firstName">Pet name</label>
+                                                <input type="text" id="name" class="form-control form-control-lg" />
+                                                <label class="form-label" for="name">Pet name</label>
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-4">
                                             <div class="form-outline">
-                                                <input type="text" id="lastName" class="form-control form-control-lg" />
-                                                <label class="form-label" for="lastName">Nicknames</label>
+                                                <input type="text" id="nicknames" class="form-control form-control-lg" />
+                                                <label class="form-label" for="nicknames">Nicknames</label>
                                             </div>
                                         </div>
                                     </div>
@@ -43,8 +43,8 @@
                                         </div>
                                         <div class="col-md-6 mb-4 d-flex align-items-center">
                                             <div class="form-outline datepicker w-100">
-                                                <input type="date" class="form-control form-control-lg" id="birthdayDate" />
-                                                <label for="birthdayDate" class="form-label">Birthday</label>
+                                                <input type="date" class="form-control form-control-lg" id="birthday" />
+                                                <label for="birthday" class="form-label">Birthday</label>
                                             </div>
                                         </div>
                                     </div>
@@ -52,30 +52,30 @@
                                         <div class="col-md-6 mb-4">
                                             <h6 class="mb-2 pb-1">Gender: </h6>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender" value="female" checked />
+                                                <input class="form-check-input" type="radio" name="genderRadioOptions" id="femaleGender" checked />
                                                 <label class="form-check-label" for="femaleGender">Female</label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender" value="male" />
+                                                <input class="form-check-input" type="radio" name="genderRadioOptions" id="maleGender" />
                                                 <label class="form-check-label" for="maleGender">Male</label>
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-4">
                                             <h6 class="mb-2 pb-1">Pet type: </h6>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="dogType" value="dog" checked />
-                                                <label class="form-check-label" for="dogType">Dog</label>
+                                                <input class="form-check-input" type="radio" name="speciesRadioOptions" id="dog" checked />
+                                                <label class="form-check-label" for="dog">Dog</label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="catType" value="cat" />
-                                                <label class="form-check-label" for="catType">Cat</label>
+                                                <input class="form-check-input" type="radio" name="speciesRadioOptions" id="cat" />
+                                                <label class="form-check-label" for="cat">Cat</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
                                             <div class="mt-4 pt-2">
-                                                <input class="btn btn-secondary btn-lg" type="submit" value="Submit" />
+                                                <input class="btn btn-secondary btn-lg" value="Submit" onclick="post_pet();"/>
                                             </div>
                                         </div>
                                     </div>
@@ -88,3 +88,54 @@
         </section>
     </body>
 </html>
+
+<script>
+    function build_pet(name, nicknames, birthday, species, gender, breed) {
+        var data = {}
+        data["name"] = name;
+        data["nicknames"] = nicknames;
+        data["birthday"] = birthday;
+        data["species"] = species;
+        data["gender"] = gender
+        data["breed"] = breed 
+        return JSON.stringify(data);
+    }
+
+    function post_pet() {
+        var name = document.getElementById("name").value;
+
+        var nicknames = document.getElementById("nicknames").value;
+
+        var breed = document.getElementById("breed").value;
+
+        var birthday = document.getElementById("birthday").value;
+
+        var isMale = document.getElementById("maleGender").checked;
+        var gender = 1;
+        if (!isMale) {
+            gender = 0;
+        }
+
+        var isDog = document.getElementById("dog").checked;
+        var species = "dog";
+        if (!isDog) {
+            species = "cat";
+        }
+
+        $.ajax ({
+            url: "https://localhost:5000/pets",
+            type: "POST",
+            data: build_pet(name, nicknames, birthday, species, gender, breed),
+            dataType: "json",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function(data) {
+                console.log(data);
+                window.location.href = "https://localhost:5000";
+            },
+            error: function(error) {
+                alert("Something bad happened: " + error.toString());
+            }
+        });
+    }
+</script>

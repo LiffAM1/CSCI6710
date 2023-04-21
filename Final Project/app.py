@@ -251,6 +251,7 @@ pets_repo = PetsRepo()
 
 @app.route('/pets', methods=['GET', 'POST'], defaults={'petId': None})
 @app.route('/pets/<petId>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def pets(petId):
     try:
         if request.method == 'GET':
@@ -264,9 +265,11 @@ def pets(petId):
                 return jsonify(pets)
         elif request.method == 'POST':
             # need validation
-            pet = Pet.from_dict(request.get_json())
-            pets_repo.create_pet(pet)
-            return jsonify(pets_repo.get_pet(pet.id))
+            pet = request.get_json()
+            pet['user_id'] = current_user.id
+            pet_obj = Pet.from_dict(pet)
+            pets_repo.create_pet(pet_obj)
+            return jsonify(pets_repo.get_pet(pet_obj.id))
         elif request.method == 'PUT':
             pet = Pet.from_dict(request.get_json())
             # need validation
