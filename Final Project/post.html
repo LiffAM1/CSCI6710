@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js">
+
+        $('#myModal').on('shown.bs.modal', function () {
+            $('#myInput').trigger('focus')
+        })
+    </script>
+
+    <title>New Post</title>
+    <style>
+        .col {
+            width: 100%;
+            padding: 8px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .inner {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<div>
+    <div clas="table">
+
+        <div class="row mb-4">
+            <div class="col">
+                <div class="inner">
+                    <h4>What do you have to share?</h4>
+                </div>
+                <div class="inner"><button type="button" class="btn btn-secondary" data-toggle="modal"
+                        data-target="#Modal1" data-whatever="">Post</button></div>
+                <div class="inner"><button type="button" class="btn btn-secondary" data-toggle="modal"
+                        data-target="#Modal2" data-whatever="">Text</button>
+                </div>
+                <div class="inner"><button type="button" class="btn btn-secondary" data-toggle="modal"
+                        data-target="#Modal3" data-whatever="@">Picture</button>
+                </div>
+            </div>
+
+            <!-- Modal 1 -->
+            <div class="modal fade" id="Modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">What would you like to share?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            Shared comments:<textarea id="textareaID" class="form-control"></textarea>
+
+                            <form method='post' action='' enctype="multipart/form-data">
+                                Select image: <input type='file' name='file' id='file' class='form-control'><br>
+                                <!-- <input type='button' class='btn btn-info' value='Upload' id='btn_upload'> -->
+                            </form>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 2 -->
+            <div class="modal fade" id="Modal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">What caption would you like to share?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Shared comments:<textarea id="textareaID" class="form-control"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 3 -->
+            <div class="modal fade" id="Modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">What photo would you like to share?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method='post' action='' enctype="multipart/form-data">
+                                Select image: <input type='file' name='file' id='file' class='form-control'><br>
+                                <!-- <input type='button' class='btn btn-info' value='Upload' id='btn_upload'> -->
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            </table>
+
+            </body>
+
+</html>
