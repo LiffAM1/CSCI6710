@@ -9,6 +9,7 @@ from model.friends_repo import FriendsRepo
 from model.reactions_repo import ReactionsRepo
 from model.models import User, Post, Pet, Friend, Reaction
 import time
+from flask_cors import CORS
 
 from flask_login import (
     LoginManager,
@@ -22,6 +23,7 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 app.config["IMAGE_UPLOADS"] = ".\photos"
 
@@ -207,7 +209,7 @@ friends_repo = FriendsRepo()
 @app.route("/friends/<petId>", methods=["GET"])
 def getFriends(petId):
     friends = friends_repo.get_friends(petId)
-    return json.dumps(friends, indent=4, sort_keys=True, default=str)
+    return jsonify(friends)
 
 
 @app.route("/nonfriends/<petId>", methods=["GET"])
@@ -221,6 +223,8 @@ def createFriend():
     friend = Friend.from_dict(request.get_json())
     friends_repo.add_friend(friend)
     return jsonify(friends_repo.get_friends(friend.pet_id))
+    
+    
 
 
 @app.route("/friends/<id>", methods=["DELETE"])
@@ -336,18 +340,18 @@ reactions_repo = ReactionsRepo()
 @app.route("/reactions/<postId>", methods=["GET"])
 def get_post_reactions(postId):
     reactions = reactions_repo.get_post_reactions(postId)
-    return json.dumps(reactions, indent=4, sort_keys=True, default=str)
+    return jsonify(reactions)
 
 
 @app.route("/reactions/treats/<postId>", methods=["GET"])
 def get_post_treats(postId):
     treats = reactions_repo.get_post_treats(postId)
-    return json.dumps(treats, indent=4, sort_keys=True, default=str)
+    return jsonify(treats)
 
 @app.route("/reactions/comments/<postId>", methods = ["GET"])
 def get_post_comments(postId):
     comments = reactions_repo.get_post_comments(postId)
-    return json.dumps(comments, indent=4, sort_keys=True, default=str)
+    return jsonify(comments)
 
 @app.route("/reactions", methods = ["POST"])
 def createReaction():
