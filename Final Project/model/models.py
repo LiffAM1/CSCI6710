@@ -36,12 +36,16 @@ class Pet(object):
         return Pet(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10])
 
     @staticmethod
-    def from_dict(dict):
+    def from_dict(dict,new=False):
         pet_id = None
         if 'id' in dict:
             pet_id = dict['id']
         else:
             pet_id = str(uuid.uuid4())
+        if new:
+            dict['profile_pic'] = "default_profile.png"
+            dict['is_active'] = True
+            dict['photos'] = [dict['profile_pic']]
         return Pet(
             pet_id,
             dict['user_id'],
@@ -49,11 +53,11 @@ class Pet(object):
             dict['nicknames'],
             dict['species'],
             dict['breed'],
-            "default_profile.png",
+            dict['profile_pic'],
             dict['birthday'],
             dict['gender'],
-            True,
-            ["default_profile.png"])
+            dict['is_active'],
+            dict['photos'])
 
 
 class Friend:

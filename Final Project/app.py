@@ -25,7 +25,7 @@ import requests
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-app.config["IMAGE_UPLOADS"] = ".\photos"
+app.config["IMAGE_UPLOADS"] = ".\static\photos"
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -68,6 +68,18 @@ def get_started():
     if pets:
         redirect('/')
     return render_template('getstarted.html', user = user.name)
+
+@app.route("/getstarted/photos")
+@login_required
+def get_started_photos():
+    user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    # if they have more than one pet set up, just go to the feed
+    if len(pets) > 1:
+        redirect('/')
+    pet = pets[0]
+    return render_template('getstartedphotos.html', pet = pet,
+        photos = ['photos/' + p for p in list(filter(lambda photo: photo != 'default_profile.png', pet['photos']))])
 
 @app.route("/signin")
 def signin():
@@ -177,12 +189,12 @@ def posts(postId):
 @app.route('/posts/<postId>/photos', methods=['POST'])
 def createPostPhotos(postId):
     try:
-        if request.files:
+        if request.files.getlist("file"):
             post = posts_repo.get_post_object(postId)
             if not post:
                 return abort(404)
 
-            response = upload_photo(request, postId, 'post')
+            response = upload_photos(request, postId, 'post')
             post.photo = response['filenames'][0]
             posts_repo.update_post(post)
 
@@ -267,7 +279,7 @@ def pets(petId):
             # need validation
             pet = request.get_json()
             pet['user_id'] = current_user.id
-            pet_obj = Pet.from_dict(pet)
+            pet_obj = Pet.from_dict(pet, True)
             pets_repo.create_pet(pet_obj)
             return jsonify(pets_repo.get_pet(pet_obj.id))
         elif request.method == 'PUT':
@@ -287,22 +299,24 @@ def pets(petId):
     except Exception as e:
         abort(500, {'message': str(e)})
 
-
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
+@login_required
 def petPhotos(petId):
     try:
         if request.method == 'GET':
             pet = pets_repo.get_pet(petId)
             if not pet:
                 abort(404)
-            return jsonify(make_photo_response(pet.id, pet.pics))
+            return jsonify(make_photo_response(pet['id'], pet['photos']))
         elif request.method == 'POST':
             pet = pets_repo.get_pet(petId)
             if not pet:
                 abort(404)
-            if request.files:
-                response = upload_photo(request, petId, 'pet')
-                pets_repo.add_pet_photo(petId, response['filenames'][0])
+            files = request.files.getlist("file")
+            if files:
+                response = upload_photos(request, petId, 'pet')
+                for f in response['filenames']:
+                    pets_repo.add_pet_photo(petId, f)
                 return jsonify(response)
             abort(400)
     except Exception as e:
@@ -324,12 +338,14 @@ def deletePetPhotos(petId, filename):
         abort(500, {'message': str(e)})
 
 
-def upload_photo(request, resourceId, resourceType):
+def upload_photos(request, resourceId, resourceType):
     ts = time.strftime("%Y%m%d-%H%M%S")
-    image = request.files["file"]
-    filename = resourceId + '-' + ts + '-' + resourceType + '-' + image.filename
-    image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
-    return make_photo_response(resourceId, [filename])
+    filenames = []
+    for image in request.files.getlist("file"):
+        filename = resourceId + '-' + ts + '-' + resourceType + '-' + image.filename
+        image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+        filenames.append(filename)
+    return make_photo_response(resourceId, filenames)
 
 
 def make_photo_response(resourceId, filenames):
