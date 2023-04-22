@@ -1,15 +1,15 @@
 import time
 import json
 import os
-from flask import Flask, redirect, request, url_for, abort, jsonify, make_response
+from flask import Flask, redirect, request, url_for, abort, jsonify, make_response, render_template
 from model.users_repo import UsersRepo
 from model.pets_repo import PetsRepo
 from model.posts_repo import PostsRepo
 from model.friends_repo import FriendsRepo
 from model.reactions_repo import ReactionsRepo
-from model.models import User, Post, Pet, Friend
+from model.models import User, Post, Pet, Friend, Reaction
 import time
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 from flask_login import (
     LoginManager,
@@ -17,16 +17,15 @@ from flask_login import (
     login_required,
     login_user,
     logout_user,
-    login_fresh
 )
 
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-app.config["IMAGE_UPLOADS"] = ".\src\photos"
-CORS(app, supports_credentials=True)
+app.config["IMAGE_UPLOADS"] = ".\photos"
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -48,12 +47,31 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-@app.route("/session/<id>")
-def session(id):
-    user = load_user(id)
-    if not user.is_active:
-        return jsonify(False)
-    return jsonify(True)
+@app.route("/")
+def index():
+    if not current_user or not current_user.is_active:
+        return redirect('/signin')
+
+    user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    if not pets:
+        return redirect('/getstarted')
+    
+    return render_template('index.html', user = user.name)
+
+@app.route("/getstarted")
+@login_required
+def get_started():
+    user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    # If they already have pets set up, just go to their feed
+    if pets:
+        redirect('/')
+    return render_template('getstarted.html', user = user.name)
+
+@app.route("/signin")
+def signin():
+    return render_template('signin.html')
 
 @app.route("/login")
 def login():
@@ -117,11 +135,8 @@ def callback():
 
     # Begin user session by logging the user in
     login_user(user, remember=True)
-    resp = make_response(redirect("http://localhost:3000"))
-    resp.set_cookie('session_id', current_user.id)
 
-    # Send user back to homepage
-    return resp
+    return redirect("/")
 
 
 @app.route("/logout")
@@ -129,9 +144,7 @@ def callback():
 def logout():
     repo.set_user_inactive(current_user.id)
     logout_user()
-    resp = make_response(redirect("http://localhost:3000"))
-    resp.set_cookie('session_id', '', expires=0)
-    return resp
+    return redirect("/")
 
 
 # Posts
@@ -196,7 +209,7 @@ friends_repo = FriendsRepo()
 @app.route("/friends/<petId>", methods=["GET"])
 def getFriends(petId):
     friends = friends_repo.get_friends(petId)
-    return json.dumps(friends, indent=4, sort_keys=True, default=str)
+    return jsonify(friends)
 
 
 @app.route("/nonfriends/<petId>", methods=["GET"])
@@ -210,6 +223,8 @@ def createFriend():
     friend = Friend.from_dict(request.get_json())
     friends_repo.add_friend(friend)
     return jsonify(friends_repo.get_friends(friend.pet_id))
+    
+    
 
 
 @app.route("/friends/<id>", methods=["DELETE"])
@@ -236,6 +251,7 @@ pets_repo = PetsRepo()
 
 @app.route('/pets', methods=['GET', 'POST'], defaults={'petId': None})
 @app.route('/pets/<petId>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def pets(petId):
     try:
         if request.method == 'GET':
@@ -249,9 +265,11 @@ def pets(petId):
                 return jsonify(pets)
         elif request.method == 'POST':
             # need validation
-            pet = Pet.from_dict(request.get_json())
-            pets_repo.create_pet(pet)
-            return jsonify(pets_repo.get_pet(pet.id))
+            pet = request.get_json()
+            pet['user_id'] = current_user.id
+            pet_obj = Pet.from_dict(pet)
+            pets_repo.create_pet(pet_obj)
+            return jsonify(pets_repo.get_pet(pet_obj.id))
         elif request.method == 'PUT':
             pet = Pet.from_dict(request.get_json())
             # need validation
@@ -325,18 +343,18 @@ reactions_repo = ReactionsRepo()
 @app.route("/reactions/<postId>", methods=["GET"])
 def get_post_reactions(postId):
     reactions = reactions_repo.get_post_reactions(postId)
-    return json.dumps(reactions, indent=4, sort_keys=True, default=str)
+    return jsonify(reactions)
 
 
 @app.route("/reactions/treats/<postId>", methods=["GET"])
 def get_post_treats(postId):
     treats = reactions_repo.get_post_treats(postId)
-    return json.dumps(treats, indent=4, sort_keys=True, default=str)
+    return jsonify(treats)
 
 @app.route("/reactions/comments/<postId>", methods = ["GET"])
 def get_post_comments(postId):
     comments = reactions_repo.get_post_comments(postId)
-    return json.dumps(comments, indent=4, sort_keys=True, default=str)
+    return jsonify(comments)
 
 @app.route("/reactions", methods = ["POST"])
 def createReaction():

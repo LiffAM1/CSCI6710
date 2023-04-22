@@ -1,0 +1,16 @@
+.color1 {color: #89b6ff;}
+.color2 {color: #ff88f5;}
+.color3 {color: #ffb895;}
+.color4 {color: #fff594;}
+.color5 {color: #c6ffd4;}
+
+.gradient-custom {
+  /* fallback for old browsers */
+  background: #ff88f5;
+  
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to bottom right, #ff88f5, #fff594);
+  
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to bottom right, #ff88f5, #fff594)
+  }

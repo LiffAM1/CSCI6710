@@ -54,7 +54,7 @@ class ReactionsRepo(PostgresRepo):
     def create_post_reaction(self, reaction):
         try:
             treat = self.get_treat_by_petid(reaction.post_id, reaction.pet_id)
-            if treat != None:
+            if treat != None and reaction.type == 1:
                 raise Exception("Treat already given.")
             conn = self.get_conn()
             cur = conn.cursor()

@@ -20,7 +20,7 @@ class PetsRepo(PostgresRepo):
     def get_pets(self):
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active FROM pets')
+        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos FROM pets')
         pets = cur.fetchall()
         cur.close()
         conn.close()
@@ -29,7 +29,7 @@ class PetsRepo(PostgresRepo):
     def get_user_pets(self, user_id):
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active FROM pets WHERE user_id = %s', (user_id,))
+        cur.execute('SELECT id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos FROM pets WHERE user_id = %s', (user_id,))
         pets = cur.fetchall()
         cur.close()
         conn.close()
@@ -38,9 +38,9 @@ class PetsRepo(PostgresRepo):
     def create_pet(self, pet):
         conn = self.get_conn()
         cur = conn.cursor()
-        cur.execute('INSERT INTO pets (id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active)'
-                    'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-                    (pet.id, pet.user_id, pet.name, pet.nicknames, pet.species, pet.breed, pet.profile_pic, pet.birthday, pet.gender, pet.is_active))
+        cur.execute('INSERT INTO pets (id, user_id, name, nicknames, species, breed, profile_pic, birthday, gender, is_active, photos)'
+                    'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                    (pet.id, pet.user_id, pet.name, pet.nicknames, pet.species, pet.breed, pet.profile_pic, pet.birthday, pet.gender, pet.is_active, pet.photos))
         conn.commit()
         cur.close()
         conn.close()
