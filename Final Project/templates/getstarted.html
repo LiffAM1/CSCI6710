@@ -123,7 +123,7 @@
         }
 
         $.ajax ({
-            url: "https://localhost:5000/pets",
+            url: "https://127.0.0.1:5000/pets",
             type: "POST",
             data: build_pet(name, nicknames, birthday, species, gender, breed),
             dataType: "json",
@@ -131,7 +131,7 @@
             contentType: "application/json; charset=utf-8",
             success: function(data) {
                 console.log(data);
-                window.location.href = "https://localhost:5000/getstarted/photos";
+                window.location.href = "https://127.0.0.1:5000/getstarted/photos";
             },
             error: function(error) {
                 alert("Something bad happened: " + error.toString());

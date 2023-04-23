@@ -57,7 +57,7 @@ def index():
     if not pets:
         return redirect('/getstarted')
     
-    return render_template('index.html', user = user.name)
+    return render_template('feed.html', pet = pets[0])
 
 @app.route("/getstarted")
 @login_required
