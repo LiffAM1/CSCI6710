@@ -25,7 +25,7 @@ import requests
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-app.config["IMAGE_UPLOADS"] = ".\static\photos"
+app.config["IMAGE_UPLOADS"] = "static"
 
 # Login
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -79,7 +79,7 @@ def get_started_photos():
         redirect('/')
     pet = pets[0]
     return render_template('getstartedphotos.html', pet = pet,
-        photos = ['photos/' + p for p in list(filter(lambda photo: photo != 'default_profile.png', pet['photos']))])
+        photos = list(filter(lambda photo: photo != 'default_profile.png', pet['photos'])))
 
 @app.route("/signin")
 def signin():
