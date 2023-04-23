@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/index.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+          crossorigin="anonymous"></script>
+        <title>Paw Pals</title>
+    </head>
+    <body>
+        <!-- Image and possible text -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">
+              <img src="{{url_for('static', filename='logo.png')}}" width="100px" height="60px" class="d-inline-block align-top" alt="">
+            </a>
+            {{nav|safe}}
+        </nav>
+        <section class="vh-100 gradient-custom">
+            <div class="container py-5 h-100">
+                <div class="row justify-content-center align-items-center h-100">
+                    <div class="col-12 col-lg-9 col-xl-7">
+                        <div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
+                            <div class="card-body p-4 p-md-5">
+                                <h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Add or Edit Pet</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="form-outline">
+                                            <input type="text" id="name" class="form-control form-control-lg" value={{ pet.name }}>
+                                            <label class="form-label" for="name">Pet name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="form-outline">
+                                            <input type="text" id="nicknames" class="form-control form-control-lg" value={{ pet.nicknames }}>
+                                            <label class="form-label" for="nicknames">Nicknames</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="form-outline">
+                                            <input type="text" id="breed" class="form-control form-control-lg" value={{ pet.breed }}>
+                                            <label class="form-label" for="breed">Breed</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4 d-flex align-items-center">
+                                        <div class="form-outline datepicker w-100">
+                                            <input type="date" class="form-control form-control-lg" id="birthday" value={{ pet.birthday }}>
+                                            <label for="birthday" class="form-label">Birthday</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="mb-2 pb-1">Gender: </h6>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="genderRadioOptions" id="femaleGender" value="0">
+                                            <label class="form-check-label" for="femaleGender">Female</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="genderRadioOptions" id="maleGender" value="1">
+                                            <label class="form-check-label" for="maleGender">Male</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="mb-2 pb-1">Pet type: </h6>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="speciesRadioOptions" id="dog" value="dog">
+                                            <label class="form-check-label" for="dog">Dog</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="speciesRadioOptions" id="cat" value="cat">
+                                            <label class="form-check-label" for="cat">Cat</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-4 justify-content-start">
+                                        {% for photo in pet.photos %}
+                                        <input type="radio" class="form-check-input" name="profilePic" value={{ photo }} id={{ photo }}>
+                                            <img style="max-width:100px" class="img-fluid img-thumbnail" src={{ url_for('static', filename=photo) }} />
+                                        </input>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-4 justify-content-start">
+                                        <form class="form-outline" id="upload-photo" >
+                                            <input type="file" class="form-control" name="file" accept=".png,.jpg" id="fileInput" multiple>
+                                            <input type="submit" class="btn btn-secondary btn-md" value="Upload"/>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-4">
+                                        <div class="mt-4 pt-2">
+                                            <input class="btn btn-secondary btn-md" value="Save" onclick="save();"/>
+                                            <input class="btn btn-secondary btn-md" value="Delete" onclick="deletePet();"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>
+
+<script>
+    var pet = {{ pet|tojson }};
+
+    function build_pet() {
+        var data = {}
+        data["id"] = pet.id;
+        data["name"] = pet.name;
+        data["user_id"] = pet.user_id;
+        data["nicknames"] = pet.nicknames;
+        data["birthday"] = pet.birthday;
+        data["species"] = pet.species;
+        data["gender"] = pet.gender;
+        data["breed"] = pet.breed;
+        data["profile_pic"] = pet.profile_pic;
+        data["photos"] = pet.photos;
+        data["is_active"] = pet.is_active;
+        return JSON.stringify(data);
+    }
+
+    $(document).ready(async function () {
+        var profilePicId = "#" + pet.profile_pic;
+        $("#maleGender").prop("checked", pet.gender == 1);
+        $("#femaleGender").prop("checked", pet.gender == 0);
+        $("#dog").prop("checked", pet.species == "dog");
+        $("#cat").prop("checked", pet.gender == "cat");
+        $(profilePicId.replace(".","\\.")).prop("checked", true);
+    });
+
+    $('form').on('submit', event => {
+        event.preventDefault()
+        
+        var totalFiles = document.getElementById('fileInput').files.length;
+        if (!totalFiles) {
+            return;
+        }
+
+        let fd = new FormData();
+        for (var i = 0; i < totalFiles; i++) {
+            fd.append("file", document.getElementById('fileInput').files[i]);
+        }
+
+        fetch('/pets/' + pet.id + '/photos', {method: 'POST', body: fd})
+            .then(result => {
+                return result.json();
+            })
+            .then(data => {
+                window.location.href = "https://127.0.0.1:5000/pet/" + pet.id + "/profile";
+            });
+    });
+
+    function save() {
+        pet.name = document.getElementById("name").value;
+
+        pet.nicknames = document.getElementById("nicknames").value;
+
+        pet.breed = document.getElementById("breed").value;
+
+        pet.birthday = document.getElementById("birthday").value;
+
+        pet.profile_pic = $('input[name=profilePic]:checked').val();
+
+        pet.gender = $('input[name=genderRadioOptions]:checked').val();
+
+        pet.species = $('input[name=speciesRadioOptions]:checked').val();
+
+        $.ajax ({
+            url: "https://127.0.0.1:5000/pets/" + pet.id,
+            type: "PUT",
+            data: build_pet(),
+            dataType: "json",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function(data) {
+                console.log(data);
+                window.location.href = "https://127.0.0.1:5000/user/profile";
+            },
+            error: function(error) {
+                alert("Something bad happened: " + error.toString());
+            }
+        });
+    }
+
+    function deletePet() {
+        $.ajax ({
+            url: "https://127.0.0.1:5000/pets/" + pet.id,
+            type: "DELETE",
+            dataType: "json",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function() {
+                window.location.href = "https://127.0.0.1:5000/user/profile";
+            },
+            error: function(error) {
+                alert("Something bad happened: " + error.toString());
+            }
+        });
+    }
+</script>

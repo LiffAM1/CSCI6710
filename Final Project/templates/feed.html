@@ -19,30 +19,12 @@
 </head>
 
 <body>
-
-  <!-- Image and possible text -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">
-      <img src="..\static\logo.png" width="100px" height="60px" class="d-inline-block align-top" alt="">
+      <img src="{{url_for('static', filename='logo.png')}}" width="100px" height="60px" class="d-inline-block align-top" alt="">
     </a>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-
-        <li class="nav-item active">
-          <a class="nav-link" href="..\templates\profile.html">Profile<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="..\templates\feed.html">Friends Feed</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="..\templates\signin.html">Log Out</a>
-        </li>
-        <!-- <li class="nav-item">
-                                <a class="nav-link" href="#">Find Friends</a>
-                            </li> -->
-      </ul>
-    </div>
-  </nav>
+    {{nav|safe}}
+</nav>
 
   <section class="gradient-custom">
     <div class="container my-5 py-5">

@@ -1,5 +1,5 @@
 import uuid
-
+from datetime import date
 
 class User:
     def __init__(self, id, name, email, is_active, is_authenticated):
@@ -59,6 +59,9 @@ class Pet(object):
             dict['is_active'],
             dict['photos'])
 
+    @staticmethod
+    def from_default(userId):
+        return Pet(str(uuid.uuid4()),userId,"","","dog","","default_profile.png",date.today(),0,False,["default_profile.png"])
 
 class Friend:
     def __init__(self, id, pet_id, friend_id, friend_date):

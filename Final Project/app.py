@@ -1,3 +1,4 @@
+from datetime import date
 import time
 import json
 import os
@@ -57,7 +58,7 @@ def index():
     if not pets:
         return redirect('/getstarted')
     
-    return render_template('feed.html', pet = pets[0])
+    return render_template('feed.html', pet = pets[0], nav = get_nav())
 
 @app.route("/getstarted")
 @login_required
@@ -80,6 +81,25 @@ def get_started_photos():
     pet = pets[0]
     return render_template('getstartedphotos.html', pet = pet,
         photos = list(filter(lambda photo: photo != 'default_profile.png', pet['photos'])))
+
+@app.route("/user/profile")
+@login_required
+def user_profile():
+    user = load_user(current_user.id)
+    pets = pets_repo.get_user_pets(user.id)
+    for pet in pets:
+        pet['age'] = int(calculate_age(pet['birthday']))
+    return render_template('profile.html', pets = pets, nav = get_nav())
+
+@app.route("/pet/<petId>/profile")
+@login_required
+def pet_profile(petId):
+    if petId == "new":
+        pet = Pet.from_default(current_user.id)
+        pets_repo.create_pet(pet)
+        petId = pet.id
+    pet = pets_repo.get_pet(petId)
+    return render_template('petprofile.html', pet = pet, nav = get_nav())
 
 @app.route("/signin")
 def signin():
@@ -265,39 +285,36 @@ pets_repo = PetsRepo()
 @app.route('/pets/<petId>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def pets(petId):
-    try:
-        if request.method == 'GET':
-            if petId:
-                pet = pets_repo.get_pet(petId)
-                if not pet:
-                    return abort(404)
-                return jsonify(pet)
-            else:
-                pets = pets_repo.get_pets()
-                return jsonify(pets)
-        elif request.method == 'POST':
-            # need validation
-            pet = request.get_json()
-            pet['user_id'] = current_user.id
-            pet_obj = Pet.from_dict(pet, True)
-            pets_repo.create_pet(pet_obj)
-            return jsonify(pets_repo.get_pet(pet_obj.id))
-        elif request.method == 'PUT':
-            pet = Pet.from_dict(request.get_json())
-            # need validation
-            if pet.id != petId:
-                return abort(400)
-            update = pets_repo.update_pet(pet)
-            if not update:
+    if request.method == 'GET':
+        if petId:
+            pet = pets_repo.get_pet(petId)
+            if not pet:
                 return abort(404)
-            return jsonify(update)
-        elif request.method == 'DELETE':
-            delete = pets_repo.delete_pet(petId)
-            if not delete:
-                return abort(404)
-            return ('', 204)
-    except Exception as e:
-        abort(500, {'message': str(e)})
+            return jsonify(pet)
+        else:
+            pets = pets_repo.get_pets()
+            return jsonify(pets)
+    elif request.method == 'POST':
+        # need validation
+        pet = request.get_json()
+        pet['user_id'] = current_user.id
+        pet_obj = Pet.from_dict(pet, True)
+        pets_repo.create_pet(pet_obj)
+        return jsonify(pets_repo.get_pet(pet_obj.id))
+    elif request.method == 'PUT':
+        pet = Pet.from_dict(request.get_json())
+        # need validation
+        if pet.id != petId:
+            return abort(400)
+        update = pets_repo.update_pet(pet)
+        if not update:
+            return abort(404)
+        return jsonify(update)
+    elif request.method == 'DELETE':
+        delete = pets_repo.delete_pet(petId)
+        if not delete:
+            return abort(404)
+        return ('', 204)
 
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 @login_required
@@ -384,6 +401,29 @@ def removeReaction(reactionId):
     if not delete:
         return abort(404)
     return ('', 204)
+
+def calculate_age(born):
+    today = date.today()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+def get_nav():
+    return """
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="https://127.0.0.1:5000/user/profile">Profile<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://127.0.0.1:5000/">Friends Feed</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://127.0.0.1:5000/logout">Log Out</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="#">Find Friends</a>
+                </li> -->
+            </ul>
+        </div>"""
 
 
 if __name__ == "__main__":
