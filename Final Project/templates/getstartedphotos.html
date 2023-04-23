@@ -89,14 +89,14 @@
                 return result.json();
             })
             .then(data => {
-                window.location.href = "https://localhost:5000/getstarted/photos";
+                window.location.href = "https://127.0.0.1:5000/getstarted/photos";
             });
     });
 
     function next() {
         var profilePicFile = $('input[name=profilePic]:checked').val();
         $.ajax ({
-            url: "https://localhost:5000/pets/" + pet.id,
+            url: "https://127.0.0.1:5000/pets/" + pet.id,
             type: "PUT",
             data: build_pet(profilePicFile),
             dataType: "json",
@@ -104,7 +104,7 @@
             contentType: "application/json; charset=utf-8",
             success: function(data) {
                 console.log(data);
-                window.location.href = "https://localhost:5000";
+                window.location.href = "https://127.0.0.1:5000";
             },
             error: function(error) {
                 alert("Something bad happened: " + error.toString());
