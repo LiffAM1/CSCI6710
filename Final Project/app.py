@@ -287,7 +287,6 @@ def petPosts(petId):
 
 pets_repo = PetsRepo()
 
-
 @app.route('/pets', methods=['GET', 'POST'], defaults={'petId': None})
 @app.route('/pets/<petId>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
@@ -374,7 +373,7 @@ def upload_photos(request, resourceId, resourceType):
 
 
 def make_photo_response(resourceId, filenames):
-    return {'resourceId': resourceId, 'filenames': filenames}
+    return {'resourceId': resourceId, 'filenames': filenames, 'urls': {fn: url_for('static', filename=fn) for fn in filenames}}
 
 
 # Reactions
