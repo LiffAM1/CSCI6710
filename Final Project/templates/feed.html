@@ -26,6 +26,8 @@
     {{nav|safe}}
 </nav>
 
+
+
   <section class="gradient-custom">
     <div class="container my-5 py-5">
       <div class="row d-flex justify-content-center">
@@ -33,9 +35,41 @@
           <div class="card">
             <div class="card-body p-4">
               <h4 class="text-center mb-4 pb-2">Pals' Posts</h4>
+              <div class="text-center mb-4 pb-2">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#myModal">Create Post</button>
+              </div> 
+              <div class="modal" id="myModal">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+              
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                      <h4 class="modal-title">New Post</h4>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+              
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                      <div class="form-outline w-100">
+                        <textarea class="form-control" rows="4"
+                          style="background: #fff;" placeholder="Message" id="new-post-text"></textarea>
+                        <input type="file" class="form-control" name="file" accept=".png,.jpg" id="fileInput">
+                      </div>
+                    </div>
+              
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary btn-block" onclick="createNewPost()" data-bs-dismiss="modal">Submit</button>
+                    </div>
+              
+                  </div>
+                </div>
+              </div>
 
               <div class="row">
+                
                 <div id="comment-container" class="col">
+                  
 
                 </div>
               </div>
@@ -58,6 +92,38 @@
   $(document).ready(async function () {
     refreshPosts();
   });
+
+  async function createNewPost() {
+    var textArea = (document.getElementById("new-post-text")).value;
+
+    var post = {
+      pet_id: pet.id,
+      message: textArea,
+      photo: "",
+      post_date: new Date(Date.now()).toISOString()
+    }
+
+    const postResponse = await $.ajax("https://127.0.0.1:5000/posts", {
+      data: JSON.stringify(post),
+      contentType: 'application/json',
+      type: 'POST'
+    });
+
+    var totalFiles = document.getElementById('fileInput').files.length;
+    if (!totalFiles) {
+        return;
+    }
+
+    let fd = new FormData();
+    for (var i = 0; i < totalFiles; i++) {
+        fd.append("file", document.getElementById('fileInput').files[i]);
+    }
+
+    const photoResponse = await fetch('/posts/' + postResponse.id + '/photos', {method: 'POST', body: fd});
+
+    (document.getElementById("new-post-text")).value = "";
+    document.getElementById('fileInput').value = "";
+  }
 
   async function refreshPosts() {
     try {
@@ -111,12 +177,12 @@
     const comments = [];
 
     post.comments.forEach((comment) => {
-      comments.push(`<div class="d-flex flex-start mt-4">
+      comments.push(`<div class="d-flex flex-start mt-4" style="margin-bottom:15px;">
         
             <img class="rounded-circle shadow-1-strong me-3"
             src="../static/${comment.profilePic}" alt="avatar" width="65"
             height="65" />
-        <div class="flex-grow-1 flex-shrink-1">
+        <div class="flex-grow-1 flex-shrink-1" >
           <div>
             <div class="d-flex justify-content-between align-items-center">
               <p class="mb-1">
@@ -139,7 +205,7 @@
       </div>
     </div>
     <div class="float-end mt-2 pt-1">
-      <button type="button" class="btn btn-primary btn-sm" onclick="postComment('${post.id}')">Post comment</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="postComment('${post.id}')">Add Comment</button>
     </div>
   </div><div>`);
 
@@ -148,7 +214,7 @@
     <img class="rounded-circle shadow-1-strong me-3"
       src="../static/${post.profilePic}" alt="avatar" width="65"
       height="65" />
-    <div class="flex-grow-1 flex-shrink-1">
+    <div class="flex-grow-1 flex-shrink-1" style="margin-bottom: 15px;">
       <div>
         <div class="d-flex justify-content-between align-items-center">
           <p class="mb-1">
@@ -156,6 +222,11 @@
           </p>
           <a href="#!" onclick="giveTreat('${post.id}')"><i class="fas fa-bone"></i><span class="small"></span></a>
         </div>
+
+        
+        ${post.photo ? `<img class="shadow-1-strong me-3"
+          src="../static/${post.photo}" style="max-width:500px;" />` : ``}
+        
         <p class="small mb-0">
           ${post.message}
         </p>

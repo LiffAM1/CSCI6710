@@ -13,6 +13,17 @@ class PostsRepo(PostgresRepo):
         cur.close()
         conn.close()
 
+    def update_post_photo(self, post):
+        conn = self.get_conn()
+        cur = conn.cursor()
+        cur.execute('UPDATE posts '
+                    'SET photo = %s '
+                    'WHERE id = %s',
+                    (post.photo, post.id))
+        conn.commit()
+        cur.close()
+        conn.close()
+
     def get_friend_posts(self, pet_id):
         conn = self.get_conn()
         cur = conn.cursor()

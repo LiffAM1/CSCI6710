@@ -45,8 +45,11 @@ def load_user(user_id):
     return repo.get_user(user_id)
 
 # Temp landing page
+
+
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
+
 
 @app.route("/")
 def index():
@@ -57,8 +60,9 @@ def index():
     pets = pets_repo.get_user_pets(user.id)
     if not pets:
         return redirect('/getstarted')
-    
-    return render_template('feed.html', pet = pets[0], nav = get_nav())
+
+    return render_template('feed.html', pet=pets[0], nav=get_nav())
+
 
 @app.route("/getstarted")
 @login_required
@@ -68,7 +72,8 @@ def get_started():
     # If they already have pets set up, just go to their feed
     if pets:
         redirect('/')
-    return render_template('getstarted.html', user = user.name)
+    return render_template('getstarted.html', user=user.name)
+
 
 @app.route("/getstarted/photos")
 @login_required
@@ -79,8 +84,9 @@ def get_started_photos():
     if len(pets) > 1:
         redirect('/')
     pet = pets[0]
-    return render_template('getstartedphotos.html', pet = pet,
-        photos = list(filter(lambda photo: photo != 'default_profile.png', pet['photos'])))
+    return render_template('getstartedphotos.html', pet=pet,
+                           photos=list(filter(lambda photo: photo != 'default_profile.png', pet['photos'])))
+
 
 @app.route("/user/profile")
 @login_required
@@ -89,7 +95,8 @@ def user_profile():
     pets = pets_repo.get_user_pets(user.id)
     for pet in pets:
         pet['age'] = int(calculate_age(pet['birthday']))
-    return render_template('profile.html', pets = pets, nav = get_nav())
+    return render_template('profile.html', pets=pets, nav=get_nav())
+
 
 @app.route("/pet/<petId>/profile")
 @login_required
@@ -99,11 +106,13 @@ def pet_profile(petId):
         pets_repo.create_pet(pet)
         petId = pet.id
     pet = pets_repo.get_pet(petId)
-    return render_template('petprofile.html', pet = pet, nav = get_nav())
+    return render_template('petprofile.html', pet=pet, nav=get_nav())
+
 
 @app.route("/signin")
 def signin():
     return render_template('signin.html')
+
 
 @app.route("/login")
 def login():
@@ -208,20 +217,20 @@ def posts(postId):
 
 @app.route('/posts/<postId>/photos', methods=['POST'])
 def createPostPhotos(postId):
-    try:
-        if request.files.getlist("file"):
-            post = posts_repo.get_post_object(postId)
-            if not post:
-                return abort(404)
+   # try:
+    if request.files.getlist("file"):
+        post = posts_repo.get_post_object(postId)
+        if not post:
+            return abort(404)
 
-            response = upload_photos(request, postId, 'post')
-            post.photo = response['filenames'][0]
-            posts_repo.update_post(post)
+        response = upload_photos(request, postId, 'post')
+        post.photo = response['filenames'][0]
+        posts_repo.update_post_photo(post)
 
-            return jsonify(response)
-        abort(400)
-    except Exception as e:
-        abort(500, {'message': str(e)})
+        return jsonify(response)
+    #    abort(400)
+    #except Exception as e:
+      #  abort(500, {'message': str(e)})
 
 # Friends
 
@@ -255,8 +264,6 @@ def createFriend():
     friend = Friend.from_dict(request.get_json())
     friends_repo.add_friend(friend)
     return jsonify(friends_repo.get_friends(friend.pet_id))
-    
-    
 
 
 @app.route("/friends/<id>", methods=["DELETE"])
@@ -314,6 +321,7 @@ def pets(petId):
         if not delete:
             return abort(404)
         return ('', 204)
+
 
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 @login_required
@@ -383,27 +391,32 @@ def get_post_treats(postId):
     treats = reactions_repo.get_post_treats(postId)
     return jsonify(treats)
 
-@app.route("/reactions/comments/<postId>", methods = ["GET"])
+
+@app.route("/reactions/comments/<postId>", methods=["GET"])
 def get_post_comments(postId):
     comments = reactions_repo.get_post_comments(postId)
     return jsonify(comments)
 
-@app.route("/reactions", methods = ["POST"])
+
+@app.route("/reactions", methods=["POST"])
 def createReaction():
     reaction = Reaction.from_dict(request.get_json())
     reactions_repo.create_post_reaction(reaction)
     return jsonify(reactions_repo.get_post_reactions(reaction.post_id))
 
-@app.route("/reactions/<reactionId>", methods = ["DELETE"])
+
+@app.route("/reactions/<reactionId>", methods=["DELETE"])
 def removeReaction(reactionId):
     delete = reactions_repo.delete_post_reaction(reactionId)
     if not delete:
         return abort(404)
     return ('', 204)
 
+
 def calculate_age(born):
     today = date.today()
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
 
 def get_nav():
     return """
@@ -422,7 +435,8 @@ def get_nav():
                     <a class="nav-link" href="#">Find Friends</a>
                 </li> -->
             </ul>
-        </div>"""
+        </div>
+        """
 
 
 if __name__ == "__main__":
