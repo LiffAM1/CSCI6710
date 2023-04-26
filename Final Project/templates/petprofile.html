@@ -84,7 +84,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12 mb-4 justify-content-start">
+                                    <div id = "photoDiv" class="col-md-12 mb-4 justify-content-start">
                                         {% for photo in pet.photos %}
                                         <input type="radio" class="form-check-input" name="profilePic" value={{ photo }} id={{ photo }}>
                                             <img style="max-width:100px" class="img-fluid img-thumbnail" src={{ url_for('static', filename=photo) }} />
@@ -163,9 +163,17 @@
                 return result.json();
             })
             .then(data => {
-                window.location.href = "https://127.0.0.1:5000/pet/" + pet.id + "/profile";
+                console.log(data);
+                data.filenames.forEach((p) => {
+                    pet.photos.push(p); 
+                    var url = data.urls[p];
+                    $("#photoDiv").append(`
+                        <input type="radio" class="form-check-input" name="profilePic" value='` + p + `' id='` + p + `''>
+                            <img style="max-width:100px" class="img-fluid img-thumbnail" src='` + url + `' />
+                        </input>`);
+                    });
             });
-    });
+        });
 
     function save() {
         pet.name = document.getElementById("name").value;
