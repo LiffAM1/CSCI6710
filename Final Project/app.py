@@ -98,6 +98,31 @@ def user_profile():
         pet['age'] = int(calculate_age(pet['birthday']))
     return render_template('profile.html', pets=pets, nav=get_nav(pets))
 
+def isFriend(pet, friendPets):
+    if friendPets == None:
+        return False
+
+    for friend in friendPets:
+        if friend['id'] == pet['id']:
+            return True
+    
+    return False
+
+@app.route("/findfriends")
+@login_required
+def find_friends():
+    user = load_user(current_user.id)
+    userPets = pets_repo.get_user_pets(user.id)
+    active_pet = [p for p in userPets if p['is_active']][0]
+
+    friendPets = friends_repo.get_friends(active_pet['id']);
+
+    allPets = pets_repo.get_pets()
+    allPets.remove(active_pet)
+    for pet in allPets:
+        pet['isFriend'] = isFriend(pet, friendPets)
+    return render_template('friends.html', activePet = active_pet,  pets=allPets, nav=get_nav(userPets))
+
 
 @app.route("/pet/<petId>/profile")
 @login_required
@@ -277,9 +302,9 @@ def createFriend():
     return jsonify(friends_repo.get_friends(friend.pet_id))
 
 
-@app.route("/friends/<id>", methods=["DELETE"])
-def removeFriend(id):
-    delete = friends_repo.delete_friend(id)
+@app.route("/friends/<petid>/<friendid>", methods=["DELETE"])
+def removeFriend(petid, friendid):
+    delete = friends_repo.delete_friend(petid, friendid)
     if not delete:
         return abort(404)
     return ('', 204)
@@ -444,11 +469,11 @@ def get_nav(pets):
                     <a class="nav-link" href="https://127.0.0.1:5000/">Friends Feed</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="https://127.0.0.1:5000/findfriends">Find Friends</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="https://127.0.0.1:5000/logout">Log Out</a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Find Friends</a>
-                </li> -->
                 <li class="nav-item">
                 {get_pet_dropdown(pets)}
                 </li>
