@@ -50,7 +50,6 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-
 @app.route("/")
 def index():
     if not current_user or not current_user.is_active:
@@ -61,7 +60,9 @@ def index():
     if not pets:
         return redirect('/getstarted')
 
-    return render_template('feed.html', pet=pets[0], nav=get_nav())
+    active_pet = [p for p in pets if p['is_active']][0]
+
+    return render_template('feed.html', pet=active_pet, nav=get_nav(pets))
 
 
 @app.route("/getstarted")
@@ -95,7 +96,7 @@ def user_profile():
     pets = pets_repo.get_user_pets(user.id)
     for pet in pets:
         pet['age'] = int(calculate_age(pet['birthday']))
-    return render_template('profile.html', pets=pets, nav=get_nav())
+    return render_template('profile.html', pets=pets, nav=get_nav(pets))
 
 
 @app.route("/pet/<petId>/profile")
@@ -106,7 +107,7 @@ def pet_profile(petId):
         pets_repo.create_pet(pet)
         petId = pet.id
     pet = pets_repo.get_pet(petId)
-    return render_template('petprofile.html', pet=pet, nav=get_nav())
+    return render_template('petprofile.html', pet=pet, nav=get_nav(pets_repo.get_user_pets(current_user.id)))
 
 
 @app.route("/signin")
@@ -179,6 +180,16 @@ def callback():
 
     return redirect("/")
 
+@app.route('/pets/<petId>/active')
+@login_required
+def set_pet_active(petId):
+    pets = pets_repo.get_user_pets(current_user.id)
+    for pet in pets:
+        if pet['id'] == petId:
+            pets_repo.set_pet_active(petId)
+        else:
+            pets_repo.set_pet_inactive(pet['id'])
+    return redirect("/")
 
 @app.route("/logout")
 @login_required
@@ -317,11 +328,15 @@ def pets(petId):
             return abort(404)
         return jsonify(update)
     elif request.method == 'DELETE':
+        pet = pets_repo.get_pet(petId)
         delete = pets_repo.delete_pet(petId)
+        # If the pet we deleted was the active one, set a different one as active
+        if pet['is_active']:
+            pets = pets_repo.get_user_pets(current_user.id)
+            pets_repo.set_pet_active(pets[0])
         if not delete:
             return abort(404)
         return ('', 204)
-
 
 @app.route('/pets/<petId>/photos', methods=['GET', 'POST'])
 @login_required
@@ -418,9 +433,9 @@ def calculate_age(born):
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
 
-def get_nav():
-    return """
-        <div class="collapse navbar-collapse" id="navbarNav">
+def get_nav(pets):
+    return f"""
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
                     <a class="nav-link" href="https://127.0.0.1:5000/user/profile">Profile<span class="sr-only">(current)</span></a>
@@ -434,10 +449,27 @@ def get_nav():
                 <!-- <li class="nav-item">
                     <a class="nav-link" href="#">Find Friends</a>
                 </li> -->
+                <li class="nav-item">
+                {get_pet_dropdown(pets)}
+                </li>
             </ul>
         </div>
         """
 
+def get_pet_dropdown(pets):
+    active_pet = [p for p in pets if p['is_active']][0]
+    nav_dropdown = f"""<div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {active_pet['name']}
+        </button>
+        <ul class="dropdown-menu">"""
+    
+    for pet in pets:
+        if pet['is_active']:
+            continue
+        nav_dropdown += f"""<li><a class="dropdown-item" href="https://127.0.0.1:5000/pets/{pet['id']}/active">{pet['name']}</a></li>"""
+    nav_dropdown += "</ul></div>"
+    return nav_dropdown
 
 if __name__ == "__main__":
     app.run(ssl_context=('adhoc'))

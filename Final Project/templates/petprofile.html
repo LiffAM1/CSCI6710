@@ -23,6 +23,19 @@
               <img src="{{url_for('static', filename='logo.png')}}" width="100px" height="60px" class="d-inline-block align-top" alt="">
             </a>
             {{nav|safe}}
+            <div class="dropdown">
+                <button
+                    class="btn btn-secondary dropdown-toggle"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-mdb-toggle="dropdown"
+                    aria-expanded="false">Dropdown button</button>
+                <ul id="navDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+        </div>
         </nav>
         <section class="vh-100 gradient-custom">
             <div class="container py-5 h-100">

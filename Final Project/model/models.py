@@ -44,7 +44,6 @@ class Pet(object):
             pet_id = str(uuid.uuid4())
         if new:
             dict['profile_pic'] = "default_profile.png"
-            dict['is_active'] = True
             dict['photos'] = [dict['profile_pic']]
         return Pet(
             pet_id,
