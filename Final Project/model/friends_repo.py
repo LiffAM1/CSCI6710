@@ -58,11 +58,11 @@ class FriendsRepo(PostgresRepo):
         except Exception as e:
             print(e)
 
-    def delete_friend(self, id):
+    def delete_friend(self, pet_id, friend_id):
         try:
             conn = self.get_conn()
             cur = conn.cursor()
-            cur.execute('DELETE FROM friends WHERE id = %s', (id,))
+            cur.execute('DELETE FROM friends WHERE pet_id = %s AND friend_id = %s', (pet_id, friend_id,))
             conn.commit()
             cur.close()
             conn.close()
