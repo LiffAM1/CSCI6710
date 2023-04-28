@@ -1,4 +1,5 @@
 from datetime import date
+import uuid
 import time
 import json
 import os
@@ -115,7 +116,7 @@ def find_friends():
     userPets = pets_repo.get_user_pets(user.id)
     active_pet = [p for p in userPets if p['is_active']][0]
 
-    friendPets = friends_repo.get_friends(active_pet['id']);
+    friendPets = friends_repo.get_friends(active_pet['id'])
 
     allPets = pets_repo.get_pets()
     allPets.remove(active_pet)
@@ -131,9 +132,11 @@ def pet_profile(petId):
         pet = Pet.from_default(current_user.id)
         pets_repo.create_pet(pet)
         petId = pet.id
+        pets = pets_repo.get_user_pets(current_user.id)
+        for p in pets:
+            friends_repo.add_friend(Friend(str(uuid.uuid4()),petId,p['id'],date.today()))
     pet = pets_repo.get_pet(petId)
     return render_template('petprofile.html', pet=pet, nav=get_nav(pets_repo.get_user_pets(current_user.id)))
-
 
 @app.route("/signin")
 def signin():
@@ -342,6 +345,8 @@ def pets(petId):
         pet['user_id'] = current_user.id
         pet_obj = Pet.from_dict(pet, True)
         pets_repo.create_pet(pet_obj)
+        # pet is a friend of itself
+        friends_repo.add_friend(Friend(str(uuid.uuid4()),pet_obj.id,pet_obj.id,date.today()))
         return jsonify(pets_repo.get_pet(pet_obj.id))
     elif request.method == 'PUT':
         pet = Pet.from_dict(request.get_json())
@@ -358,7 +363,7 @@ def pets(petId):
         # If the pet we deleted was the active one, set a different one as active
         if pet['is_active']:
             pets = pets_repo.get_user_pets(current_user.id)
-            pets_repo.set_pet_active(pets[0])
+            pets_repo.set_pet_active(pets[0]['id'])
         if not delete:
             return abort(404)
         return ('', 204)
@@ -385,7 +390,6 @@ def petPhotos(petId):
             abort(400)
     except Exception as e:
         abort(500, {'message': str(e)})
-
 
 @app.route('/pets/<petId>/photos/<filename>', methods=['DELETE'])
 def deletePetPhotos(petId, filename):
@@ -485,7 +489,7 @@ def get_pet_dropdown(pets):
     active_pet = [p for p in pets if p['is_active']][0]
     nav_dropdown = f"""<div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {active_pet['name']}
+            <img class="rounded-circle shadow-1-strong me-3" src="{url_for('static',filename=active_pet['profile_pic'])}" alt="avatar" width="25" height="25" /> {active_pet['name']}
         </button>
         <ul class="dropdown-menu">"""
     
