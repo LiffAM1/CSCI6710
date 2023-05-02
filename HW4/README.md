@@ -3,6 +3,7 @@ CSCI6710 Homework 4
 
 ## Team Members:
 Kristen Griffith, Katie Warren, Abigail Holloway
+griffithk10@students.ecu.edu, warrenk14@students.ecu.edu, hollowayab21@students.ecu.edu
 
 ## Flowhcarts
 These can be found in the "flowcharts" folder. Note that the flowcharts do not include the extra credit logic, just the threshold-based and random decision logic.
